@@ -1,0 +1,85 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version of this release (e.g. v1.0)'
+        required: true
+        default: '1.0'
+      summary:
+        description: 'Summary of this release'
+        required: true
+        default: 'Initial release'
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          VERSION_HYPHEN="${VERSION// /-}"
+          gh release create "v${VERSION_HYPHEN}" --title "${VERSION}" --notes "${{ github.event.inputs.summary }}" --latest
+
+  build-script:
+    name: Bundle and Upload Scoot Plus
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Setup RoKit
+        uses: CompeyDev/setup-rokit@v0.1.2
+
+      - name: Install Necessary Tools
+        run: |
+          rokit trust rojo-rbx/rojo
+          rokit trust lune-org/lune
+          rokit trust seaofvoices/darklua
+          rokit trust UpliftGames/wally
+          rokit trust JohnnyMorganz/wally-package-types
+          rokit install
+
+      - name: Build
+        run: lune run build bundle script-output="Distribution/Scoot.luau" model-output="Distribution/Scoot.rbxm" minify=true env-name="Scoot Plus" darklua-config-path=lune/build/darklua.config.json temp-dir-base="Distribution" extra-offset-lines=0 ci-mode=true verbose=true header=lune/build/header.luau
+
+      - name: Upload Minified Scoot Plus to Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Scoot.luau
+          path: Distribution/Scoot.luau
+      
+      - name: Upload Minified Scoot Plus to Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $version = "${{ github.event.inputs.version }}"
+          $versionHyphen = $version -replace " ", "-"
+          gh release upload "v$versionHyphen" "Distribution/Scoot.luau"
+        shell: pwsh
+      
+      - name: Upload Scoot Plus Model to Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $version = "${{ github.event.inputs.version }}"
+          $versionHyphen = $version -replace " ", "-"
+          gh release upload "v$versionHyphen" "Distribution/Scoot.rbxm"
+        shell: pwsh
+
+      - name: Upload Scoot Plus Model to Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Scoot.rbxm
+          path: Distribution/Scoot.rbxm
