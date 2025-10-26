@@ -9,10 +9,6 @@
     date: 19.07.2025
 ]]
 
-if Library then
-    Library:Unload()
-end
-
 local LoadTick = os.clock()
 
 local Library do
@@ -6216,6 +6212,7 @@ local Library do
     end
 end
 
+--[[
 local Window = Library:Window({
     Logo = "77218680285262",
     FadeTime = 0.3,
@@ -6539,5 +6536,5 @@ do
 end
 
 Library:Notification("Loaded!", "Menu took "..string.format("%.4f", os.clock() - LoadTick).." seconds to load", 5)
-
+]]
 return Library

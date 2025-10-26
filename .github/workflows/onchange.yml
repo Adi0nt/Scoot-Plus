@@ -1,0 +1,56 @@
+name: Pushed
+
+on:
+  push:
+    paths:
+      - '**.luau'
+      - '**.lua'
+      - '**.rbxm'
+      - '**.json'
+      - '**.yml'
+  pull_request:
+    paths:
+      - '**.luau'
+      - '**.lua'
+      - '**.rbxm'
+      - '**.json'
+      - '**.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build-script:
+    name: Bundle and Upload Scoot Plus
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Setup RoKit
+        uses: CompeyDev/setup-rokit@v0.1.2
+
+      - name: Install Necessary Tools
+        run: |
+          rokit trust rojo-rbx/rojo
+          rokit trust lune-org/lune
+          rokit trust seaofvoices/darklua
+          rokit trust UpliftGames/wally
+          rokit trust JohnnyMorganz/wally-package-types
+          rokit install
+
+      - name: Build
+        run: lune run build bundle script-output="Distribution/Scoot.luau" model-output="Distribution/Scoot.rbxm" minify=true env-name="Scoot Plus" darklua-config-path=lune/build/darklua.config.json temp-dir-base="Distribution" extra-offset-lines=0 ci-mode=true verbose=true header=lune/build/header.luau
+
+      - name: Upload Minified Scoot Plus to Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Scoot.luau
+          path: Distribution/Scoot.luau
+
+      - name: Upload Scoot Plus Model to Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Scoot.rbxm
+          path: Distribution/Scoot.rbxm
