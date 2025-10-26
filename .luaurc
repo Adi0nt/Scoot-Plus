@@ -1,14 +1,14 @@
 {
-    "languageMode": "strict",
-    "lint": {
-        "*": true
-    },
-    "aliases": {
-        "lune": "./lune/Types"
-    },
-    "lintErrors": false,
-    "typeErrors": true,
-    "globals": [
-        "warn"
-    ]
+  "languageMode": "strict",
+  "lint": {
+    "*": true
+  },
+  "aliases": {
+    "lune": "~/.lune/.typedefs/0.10.4/"
+  },
+  "lintErrors": false,
+  "typeErrors": true,
+  "globals": [
+    "warn"
+  ]
 }
