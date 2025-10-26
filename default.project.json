@@ -1,9 +1,6 @@
 {
 	"name": "Scoot Plus",
 	"tree": {
-		"$path": "source",
-		"Packages": {
-			"$path": "Packages"
-		}
+		"$path": "source"
 	}
 }
