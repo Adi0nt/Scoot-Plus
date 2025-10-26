@@ -1,7 +1,7 @@
 {
     "luau-lsp.sourcemap.rojoProjectFile": "place.project.json",
     "luau-lsp.sourcemap.enabled": true,
-    "luau-lsp.types.definitionFiles": [".vscode/exploitTypes.d.luau"],
+    "luau-lsp.types.definitionFiles": [".vscode/types.luau"],
     "luau-lsp.types.robloxSecurityLevel": "RobloxScriptSecurity",
     "luau-lsp.sourcemap.autogenerate": true,
     "luau-lsp.sourcemap.includeNonScripts": true,
@@ -9,10 +9,7 @@
     "luau-lsp.ignoreGlobs": [
         "**/Decompiled Sources/**",
         "Distribution/**",
-        "src/Icons.luau",
-        "Lune/Build/init.luau",
-        "Lune/Build/Lib/**",
-        "Packages/_Index"
+        ".lune/build/init.luau",
     ],
     "files.autoSave": "afterDelay",
     "files.autoSaveDelay": 5000,

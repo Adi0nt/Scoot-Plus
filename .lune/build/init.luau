@@ -13,8 +13,8 @@ local net = require("@lune/net") :: any
 local luau = require("@lune/luau") :: any
 local fs = require("@lune/fs") :: any
 
-if not fs.isDir("Distribution") then
-	fs.writeDir("Distribution")
+if not fs.isDir("distribution") then
+	fs.writeDir("distribution")
 end
 
 local FileLink = if string.lower(WaxVersion) == "latest" then

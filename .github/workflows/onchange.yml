@@ -41,10 +41,10 @@ jobs:
           rokit install
 
       - name: Build
-        run: lune run build bundle output="Distribution/Scoot.luau" minify=true env-name="Scoot Plus" temp-dir-base="Distribution" extra-offset-lines=0 ci-mode=true verbose=true
+        run: lune run build bundle output="distribution/scoot.luau" minify=true env-name="Scoot Plus" temp-dir-base="distribution" extra-offset-lines=0 ci-mode=true verbose=true
 
       - name: Upload Minified Scoot Plus to Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Scoot.luau
-          path: Distribution/Scoot.luau
+          name: scoot.luau
+          path: distribution/scoot.luau
