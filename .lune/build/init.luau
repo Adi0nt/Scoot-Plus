@@ -11,6 +11,11 @@ local WaxVersion = "latest"
 
 local net = require("@lune/net") :: any
 local luau = require("@lune/luau") :: any
+local fs = require("@lune/fs") :: any
+
+if not fs.isDir("Distribution") then
+	fs.writeDir("Distribution")
+end
 
 local FileLink = if string.lower(WaxVersion) == "latest" then
     "https://github.com/latte-soft/wax/releases/latest/download/wax.luau"
@@ -19,3 +24,4 @@ else `https://github.com/latte-soft/wax/releases/download/{WaxVersion}/wax.luau`
 luau.load(net.request(FileLink).body, {
     debugName = "Wax",
 })()
+
