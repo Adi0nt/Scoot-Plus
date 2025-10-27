@@ -617,9 +617,7 @@ local Library do
 	do
 		function CustomFont:New(Name, Weight, Style, Data)
 
-			if not isfile(Library.Folders.Assets .. "/" .. Name .. ".ttf") then
-				writefile(Library.Folders.Assets .. "/" .. Name .. ".ttf", game:HttpGetAsync(Data.Url))
-			end
+			writefile(Library.Folders.Assets .. "/" .. Name .. ".ttf", game:HttpGetAsync(Data.Url))
 
 			local FontData = {
 				name = Name,
@@ -633,17 +631,14 @@ local Library do
 				},
 			}
 
-			if not isfile(Library.Folders.Assets .. "/" .. Name .. ".json") then
-				writefile(Library.Folders.Assets .. "/" .. Name .. ".json", HttpService:JSONEncode(FontData))
-			end
+			writefile(Library.Folders.Assets .. "/" .. Name .. ".json", HttpService:JSONEncode(FontData))
 
-			return Font.new(getcustomasset(Library.Folders.Assets .. "/" .. Name .. ".json"), Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-		end
+            local FontFace = Font.new(getcustomasset(Library.Folders.Assets .. "/" .. Name .. ".json"))
 
-		function CustomFont:Get(Name)
-			if isfile(Library.Folders.Assets .. "/" .. Name .. ".json") then
-				return Font.new(getcustomasset(Library.Folders.Assets .. "/" .. Name .. ".json"), Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-			end
+            delfile(Library.Folders.Assets .. "/" .. Name .. ".ttf")
+            delfile(Library.Folders.Assets .. "/" .. Name .. ".json")
+
+			return FontFace
 		end
 
 		Library.Font = CustomFont:New("Monaco", 400, "Normal", {
