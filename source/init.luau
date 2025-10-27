@@ -637,17 +637,17 @@ local Library do
 				writefile(Library.Folders.Assets .. "/" .. Name .. ".json", HttpService:JSONEncode(FontData))
 			end
 
-			return Font.new(getcustomasset(Library.Folders.Assets .. "/" .. Name .. ".json"))
+			return Font.new(getcustomasset(Library.Folders.Assets .. "/" .. Name .. ".json"), Enum.FontWeight.Regular, Enum.FontStyle.Normal)
 		end
 
 		function CustomFont:Get(Name)
 			if isfile(Library.Folders.Assets .. "/" .. Name .. ".json") then
-				return Font.new(getcustomasset(Library.Folders.Assets .. "/" .. Name .. ".json"))
+				return Font.new(getcustomasset(Library.Folders.Assets .. "/" .. Name .. ".json"), Enum.FontWeight.Regular, Enum.FontStyle.Normal)
 			end
 		end
 
-		Library.Font = CustomFont:New("Monaco", 400, "Regular", {
-			Url = "https://github.com/sametexe001/luas/raw/refs/heads/main/fonts/Monaco.ttf",
+		Library.Font = CustomFont:New("Monaco", 400, "Normal", {
+			Url = "https://github.com/Adi0nt/Scoot-Plus/blob/main/assets/Monaco.ttf",
 		})
 
 	end
