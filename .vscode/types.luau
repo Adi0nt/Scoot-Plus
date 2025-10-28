@@ -103,7 +103,17 @@ declare function set_thread_identity(level: number);
 declare function messagebox(text: string, title: string, flag: number): number;
 declare function queueonteleport(script: string);
 declare function queue_on_teleport(script: string);
-declare function request(a1: {}, async: boolean?);
+declare function request(requestOptions: {Url: string,
+    Method: "GET" | "HEAD" | "POST" | "PUT" | "DELETE" | "OPTIONS" | "PATCH",
+    Body: string?,
+    Headers: { [string]: string }?,
+    Cookies: { [string]: string }?}, async: boolean?): {
+    Success: boolean,
+    Body: string,
+    StatusCode: number,
+    StatusMessage: string,
+    Headers: { [string]: string }
+};
 declare function http_request(a1: {}, async: boolean?);
 declare function zstdcompress(data: string): string;
 declare function zstddecompress(data: string): string;

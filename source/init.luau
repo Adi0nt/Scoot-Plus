@@ -17,7 +17,7 @@ local Library do
     local Players = game:GetService("Players")
     local HttpService = game:GetService("HttpService")
     local RunService = game:GetService("RunService")
-    local CoreGui = cloneref and cloneref(game:GetService("CoreGui")) or game:GetService("CoreGui")
+    local CoreGui = game:GetService("CoreGui")
     local TweenService = game:GetService("TweenService")
 
     gethui = gethui or function()
@@ -613,39 +613,46 @@ local Library do
     end
 
     -- Custom font
-    local CustomFont = {}
-	do
-		function CustomFont:New(Name, Weight, Style, Data)
+    local CustomFont = { } do
+        function CustomFont:New(Name, Weight, Style, Data)
 
-			writefile(Library.Folders.Assets .. "/" .. Name .. ".ttf", game:HttpGetAsync(Data.Url))
+            local Path = Library.Folders.Assets .. "/" .. Name
 
-			local FontData = {
-				name = Name,
-				faces = {
-					{
-						name = "Regular",
-						weight = Weight,
-						style = Style,
-						assetId = getcustomasset(Library.Folders.Assets .. "/" .. Name .. ".ttf"),
-					},
-				},
-			}
+            local Response = request(Data, true)
 
-			writefile(Library.Folders.Assets .. "/" .. Name .. ".json", HttpService:JSONEncode(FontData))
+            writefile(Path .. ".ttf", Response.Body)
 
-            local FontFace = Font.new(getcustomasset(Library.Folders.Assets .. "/" .. Name .. ".json"))
+            local FontData = {
+                name = Name,
+                faces = { {
+                    name = "Regular",
+                    weight = Weight,
+                    style = Style,
+                    assetId = getcustomasset(Path .. ".ttf")
+                } }
+            }
 
-            delfile(Library.Folders.Assets .. "/" .. Name .. ".ttf")
-            delfile(Library.Folders.Assets .. "/" .. Name .. ".json")
+            writefile(Path .. ".json", HttpService:JSONEncode(FontData))
+            
+            return Font.new(getcustomasset(Path .. ".json"))
+        end
 
-			return FontFace
-		end
+        function CustomFont:Get(Name)
 
-		Library.Font = CustomFont:New("Monaco", 400, "Normal", {
-			Url = "https://github.com/Adi0nt/Scoot-Plus/blob/main/assets/Monaco.ttf",
-		})
+            local Path = Library.Folders.Assets .. "/" .. Name
 
-	end
+            if isfile(Path .. ".json") then
+                return Font.new(getcustomasset(Path .. ".json"))
+            end
+        end
+
+        CustomFont:New("Monaco", 400, "normal", {
+            Url = "https://github.com/Adi0nt/Scoot-Plus/blob/main/assets/Monaco.ttf",
+            Method = "GET"
+        })
+
+        Library.Font = CustomFont:Get("Monaco")
+    end
 
     Library.Holder = Instances:Create("ScreenGui", {
         Parent = gethui(),
