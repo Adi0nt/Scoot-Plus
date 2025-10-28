@@ -694,7 +694,7 @@ do
 		end
 
 		CustomFont:New("Monaco", 400, "normal", {
-			Url = "https://github.com/Adi0nt/Scoot-Plus/blob/main/assets/Monaco.ttf",
+			Url = "https://github.com/Adi0nt/Scoot-Plus/raw/main/assets/Monaco.ttf",
 			Method = "GET",
 		})
 
