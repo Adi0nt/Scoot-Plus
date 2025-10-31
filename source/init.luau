@@ -68,6 +68,10 @@ do
 	local LocalPlayer = Clone(Players.LocalPlayer)
 	local Camera = Clone(Workspace.CurrentCamera)
 
+	local FromAssetId = Clone(Content.fromAssetId) or function(self)
+		return {Uri = "rbxassetid://" .. self}
+	end
+
 	local FromRGB = Clone(Color3.fromRGB)
 	local FromHSV = Clone(Color3.fromHSV)
 	local FromHex = Clone(Color3.fromHex)
@@ -575,7 +579,7 @@ do
 
 			local ResizeButton = Instances:Create("ImageButton", {
 				Parent = Gui,
-				Image = Content.fromAssetId(0).Uri,
+				Image = FromAssetId(0).Uri,
 				AnchorPoint = Vector2New(1, 1),
 				BorderColor3 = FromRGB(0, 0, 0),
 				Size = UDim2FromOffset(6, 6),
@@ -1664,7 +1668,7 @@ do
 					ImageTransparency = 1,
 					BorderColor3 = FromRGB(0, 0, 0),
 					AnchorPoint = Vector2New(0.5, 0.5),
-					Image = Content.fromAssetId(108016671469439).Uri,
+					Image = FromAssetId(108016671469439).Uri,
 					BackgroundTransparency = 1,
 					Position = UDim2New(0.5, 0, 0.5, 0),
 					Size = UDim2New(1, 2, 1, 2),
@@ -2363,7 +2367,7 @@ do
 					ScaleType = Enum.ScaleType.Fit,
 					BorderColor3 = FromRGB(0, 0, 0),
 					AnchorPoint = Vector2New(1, 0.5),
-					Image = Content.fromAssetId(113229176886493).Uri,
+					Image = FromAssetId(113229176886493).Uri,
 					BackgroundTransparency = 1,
 					Position = UDim2New(1, -2, 0.5, 0),
 					Size = UDim2New(0, 20, 0, 20),
@@ -4705,7 +4709,7 @@ do
 					ScaleType = Enum.ScaleType.Fit,
 					BorderColor3 = FromRGB(0, 0, 0),
 					AnchorPoint = Vector2New(0, 0.5),
-					Image = Content.fromAssetId(71197946135150).Uri,
+					Image = FromAssetId(71197946135150).Uri,
 					BackgroundTransparency = 1,
 					Position = UDim2New(0, 0, 0.5, 0),
 					Size = UDim2New(0, 16, 0, 16),
@@ -4790,14 +4794,14 @@ do
 					BorderSizePixel = 0,
 					CanvasSize = UDim2New(0, 0, 0, 0),
 					ScrollBarImageColor3 = FromRGB(202, 243, 255),
-					MidImage = Content.fromAssetId(136419474381965).Uri,
+					MidImage = FromAssetId(136419474381965).Uri,
 					BorderColor3 = FromRGB(0, 0, 0),
 					ScrollBarThickness = 2,
 					Size = UDim2New(1, -12, 1, -10),
 					Position = UDim2New(0, 3, 0, 5),
-					TopImage = Content.fromAssetId(136419474381965).Uri,
+					TopImage = FromAssetId(136419474381965).Uri,
 					CanvasPosition = Vector2New(0, 57),
-					BottomImage = Content.fromAssetId(136419474381965).Uri,
+					BottomImage = FromAssetId(136419474381965).Uri,
 					BackgroundTransparency = 1,
 					BackgroundColor3 = FromRGB(255, 255, 255),
 				})
@@ -5438,14 +5442,14 @@ do
 				BorderSizePixel = 0,
 				CanvasSize = UDim2New(0, 0, 0, 0),
 				ScrollBarImageColor3 = FromRGB(202, 243, 255),
-				MidImage = Content.fromAssetId(123708228368098).Uri,
+				MidImage = FromAssetId(123708228368098).Uri,
 				BorderColor3 = FromRGB(0, 0, 0),
 				ScrollBarThickness = 2,
 				Size = UDim2New(1, -4, 1, -8),
 				BackgroundTransparency = 1,
 				Position = UDim2New(0, 0, 0, 4),
-				BottomImage = Content.fromAssetId(123708228368098).Uri,
-				TopImage = Content.fromAssetId(123708228368098).Uri,
+				BottomImage = FromAssetId(123708228368098).Uri,
+				TopImage = FromAssetId(123708228368098).Uri,
 				BackgroundColor3 = FromRGB(255, 255, 255),
 			})
 			Items["Holder"]:AddToTheme({ ScrollBarImageColor3 = "Accent" })
@@ -5566,7 +5570,7 @@ do
 					ScaleType = Enum.ScaleType.Fit,
 					BorderColor3 = FromRGB(0, 0, 0),
 					AnchorPoint = Vector2New(0.5, 0.5),
-					Image = Content.fromAssetId(Image).Uri,
+					Image = FromAssetId(Image).Uri,
 					BackgroundTransparency = 1,
 					Position = UDim2New(0.5, 0, 0.5, 0),
 					Size = UDim2New(0, 45, 0, 45),
@@ -5639,7 +5643,7 @@ do
 				ScaleType = Enum.ScaleType.Fit,
 				BorderColor3 = FromRGB(0, 0, 0),
 				AnchorPoint = Vector2New(0.5, 0),
-				Image = Content.fromAssetId(Window.Logo).Uri,
+				Image = FromAssetId(Window.Logo).Uri,
 				BackgroundTransparency = 1,
 				Position = UDim2New(0.5, 0, 0, 12),
 				Size = UDim2New(0, 75, 0, 75),
@@ -5670,7 +5674,7 @@ do
 				ScaleType = Enum.ScaleType.Fit,
 				BorderColor3 = FromRGB(0, 0, 0),
 				AnchorPoint = Vector2New(0, 0.5),
-				Image = Content.fromAssetId(71197946135150).Uri,
+				Image = FromAssetId(71197946135150).Uri,
 				BackgroundTransparency = 1,
 				Position = UDim2New(0, 0, 0.5, 0),
 				Size = UDim2New(0, 16, 0, 16),
@@ -5786,7 +5790,7 @@ do
 				Parent = Items["MouseBackground"].Instance,
 				Name = "\0",
 				BorderColor3 = FromRGB(0, 0, 0),
-				Image = Content.fromAssetId(76631660114196).Uri,
+				Image = FromAssetId(76631660114196).Uri,
 				BackgroundTransparency = 1,
 				Size = UDim2FromScale(1, 1),
 				BorderSizePixel = 0,
