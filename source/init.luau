@@ -1,68 +1,109 @@
 --[[
     scoot ui library
     made by samet
-    
-    https://discord.gg/VhvTd5HV8d
-    ^^ join for custom commissions
-
-    example/documentation is at the bottom
-    date: 19.07.2025
+	edited by adiont
 ]]
 
 local LoadTick = os.clock()
 
 local Library
-do
-	local Workspace = game:GetService("Workspace")
-	local UserInputService = game:GetService("UserInputService")
-	local Players = game:GetService("Players")
-	local HttpService = game:GetService("HttpService")
-	local RunService = game:GetService("RunService")
-	local CoreGui = game:GetService("CoreGui")
-	local TweenService = game:GetService("TweenService")
 
-	gethui = gethui or function()
+do
+	local function Clone<Original>(ToClone: any & Original): (Original, boolean)
+		local Type = typeof(ToClone)
+		local CloneFunction = clonefunc or clonefunction
+		local CloneReference = cloneref or clonereference
+		local SetRawMetatable = setrawmetatable or debug.setmetatable
+		local GetRawMetatable = getrawmetatable or debug.getmetatable
+		if Type == "function" then
+			return CloneFunction(ToClone), true
+		elseif Type == "Instance" then
+			return CloneReference(ToClone), true
+		elseif Type == "table" then
+			local function deepcopy(orig, copies: { [any]: any }?)
+				local Copies = copies or {}
+				local orig_type, copy = typeof(orig), nil
+
+				if orig_type == "table" then
+					if Copies[orig] then
+						copy = Copies[orig]
+					else
+						copy = {}
+
+						Copies[orig] = copy
+
+						for orig_key, orig_value in next, orig, nil do
+							copy[deepcopy(orig_key, Copies)] = deepcopy(orig_value, Copies)
+						end
+
+						SetRawMetatable(copy, deepcopy(GetRawMetatable(orig), Copies))
+					end
+				elseif orig_type == "Instance" or orig_type == "function" then
+					copy = Clone(orig)
+				else
+					copy = orig
+				end
+
+				return copy
+			end
+			return deepcopy(ToClone), true
+		else
+			return ToClone, false
+		end
+	end
+
+	local Game = Clone(Game)
+	local Workspace = Clone(Game:GetService("Workspace"))
+	local UserInputService = Clone(Game:GetService("UserInputService"))
+	local Players = Clone(Game:GetService("Players"))
+	local HttpService = Clone(Game:GetService("HttpService"))
+	local RunService = Clone(Game:GetService("RunService"))
+	local CoreGui = Clone(Game:GetService("CoreGui"))
+	local TweenService = Clone(Game:GetService("TweenService"))
+
+	local GetHui = gethui or function()
 		return CoreGui
 	end
 
-	local LocalPlayer = Players.LocalPlayer
-	local Camera = Workspace.CurrentCamera
-	local Mouse = LocalPlayer:GetMouse()
+	local LocalPlayer = Clone(Players.LocalPlayer)
+	local Camera = Clone(Workspace.CurrentCamera)
 
-	local FromRGB = Color3.fromRGB
-	local FromHSV = Color3.fromHSV
-	local FromHex = Color3.fromHex
+	local FromRGB = Clone(Color3.fromRGB)
+	local FromHSV = Clone(Color3.fromHSV)
+	local FromHex = Clone(Color3.fromHex)
 
-	local RGBSequence = ColorSequence.new
-	local RGBSequenceKeypoint = ColorSequenceKeypoint.new
-	local NumSequence = NumberSequence.new
-	local NumSequenceKeypoint = NumberSequenceKeypoint.new
+	local RGBSequence = Clone(ColorSequence.new)
+	local RGBSequenceKeypoint = Clone(ColorSequenceKeypoint.new)
+	local NumSequence = Clone(NumberSequence.new)
+	local NumSequenceKeypoint = Clone(NumberSequenceKeypoint.new)
 
-	local UDim2New = UDim2.new
-	local UDimNew = UDim.new
-	local Vector2New = Vector2.new
+	local UDim2New = Clone(UDim2.new)
+	local UDim2FromOffset = Clone(UDim2.fromOffset)
+	local UDim2FromScale = Clone(UDim2.fromScale)
+	local UDimNew = Clone(UDim.new)
+	local Vector2New = Clone(Vector2.new)
 
-	local MathClamp = math.clamp
-	local MathFloor = math.floor
-	local MathAbs = math.abs
-	local MathSin = math.sin
+	local MathClamp = Clone(math.clamp)
+	local MathFloor = Clone(math.floor)
+	local MathAbs = Clone(math.abs)
+	local MathSin = Clone(math.sin)
 
-	local TableInsert = table.insert
-	local TableFind = table.find
-	local TableRemove = table.remove
-	local TableConcat = table.concat
-	local TableClone = table.clone
-	local TableUnpack = table.unpack
+	local TableInsert = Clone(table.insert)
+	local TableFind = Clone(table.find)
+	local TableRemove = Clone(table.remove)
+	local TableConcat = Clone(table.concat)
+	local TableClone = Clone(table.clone)
+	local TableUnpack = Clone(table.unpack)
 
-	local StringFormat = string.format
-	local StringFind = string.find
-	local StringGSub = string.gsub
-	local StringLower = string.lower
-	local StringLen = string.len
+	local StringFormat = Clone(string.format)
+	local StringFind = Clone(string.find)
+	local StringGSub = Clone(string.gsub)
+	local StringLower = Clone(string.lower)
+	local StringLen = Clone(string.len)
 
-	local InstanceNew = Instance.new
+	local InstanceNew = Clone(Instance.new)
 
-	local RectNew = Rect.new
+	local RectNew = Clone(Rect.new)
 
 	local IsMobile = UserInputService.TouchEnabled or false
 
@@ -226,21 +267,22 @@ do
 	Library.Theme = TableClone(Themes["Preset"])
 
 	-- Folders
-	for Index, Value in Library.Folders do
+	for Index, Value in next, Library.Folders do
 		if not isfolder(Value) then
 			makefolder(Value)
 		end
 	end
 
 	-- Images
-	for Index, Value in Library.Images do
+	for Index, Value in next, Library.Images do
 		local ImageData = Value
 
 		local ImageName = ImageData[1]
 		local ImageLink = ImageData[2]
 
 		if not isfile(Library.Folders.Assets .. "/" .. ImageName) then
-			writefile(Library.Folders.Assets .. "/" .. ImageName, game:HttpGet(ImageLink))
+			local Response = request({ Url = ImageLink, Method = "GET" }, true)
+			writefile(Library.Folders.Assets .. "/" .. ImageName, Response.Body)
 		end
 	end
 
@@ -358,7 +400,7 @@ do
 
 			setmetatable(NewItem, Instances)
 
-			for Property, Value in NewItem.Properties do
+			for Property, Value in next, NewItem.Properties do
 				NewItem.Instance[Property] = Value
 			end
 
@@ -377,15 +419,15 @@ do
 
 			local NewTween
 
-			for Index, Value in Descendants do
+			for Index, Value in next, Descendants do
 				local TransparencyProperty = Tween:GetProperty(Value)
 
 				if not TransparencyProperty then
 					continue
 				end
 
-				if type(TransparencyProperty) == "table" then
-					for _, Property in TransparencyProperty do
+				if typeof(TransparencyProperty) == "table" then
+					for _, Property in next, TransparencyProperty do
 						NewTween = Tween:FadeItem(Value, Property, not Visibility, Speed)
 					end
 				else
@@ -468,17 +510,14 @@ do
 
 			local Set = function(Input)
 				local DragDelta = Input.Position - DragStart
-				self:Tween(
-					TweenInfo.new(0.16, Enum.EasingStyle.Quart, Enum.EasingDirection.Out),
-					{
-						Position = UDim2New(
-							StartPosition.X.Scale,
-							StartPosition.X.Offset + DragDelta.X,
-							StartPosition.Y.Scale,
-							StartPosition.Y.Offset + DragDelta.Y
-						),
-					}
-				)
+				self:Tween(TweenInfo.new(0.16, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+					Position = UDim2New(
+						StartPosition.X.Scale,
+						StartPosition.X.Offset + DragDelta.X,
+						StartPosition.Y.Scale,
+						StartPosition.Y.Offset + DragDelta.Y
+					),
+				})
 			end
 
 			local InputChanged
@@ -536,10 +575,10 @@ do
 
 			local ResizeButton = Instances:Create("ImageButton", {
 				Parent = Gui,
-				Image = "rbxassetid://",
+				Image = Content.fromAssetId(0).Uri,
 				AnchorPoint = Vector2New(1, 1),
 				BorderColor3 = FromRGB(0, 0, 0),
-				Size = UDim2New(0, 6, 0, 6),
+				Size = UDim2FromOffset(6, 6),
 				Position = UDim2New(1, -4, 1, -4),
 				Name = "\0",
 				BorderSizePixel = 0,
@@ -702,7 +741,7 @@ do
 	end
 
 	Library.Holder = Instances:Create("ScreenGui", {
-		Parent = gethui(),
+		Parent = GetHui(),
 		Name = "\0",
 		ZIndexBehavior = Enum.ZIndexBehavior.Global,
 		DisplayOrder = 2,
@@ -710,7 +749,7 @@ do
 	})
 
 	Library.UnusedHolder = Instances:Create("ScreenGui", {
-		Parent = gethui(),
+		Parent = GetHui(),
 		Name = "\0",
 		ZIndexBehavior = Enum.ZIndexBehavior.Global,
 		Enabled = false,
@@ -746,11 +785,11 @@ do
 	})
 
 	Library.Unload = function(self)
-		for Index, Value in self.Connections do
+		for Index, Value in next, self.Connections do
 			Value.Connection:Disconnect()
 		end
 
-		for Index, Value in self.Threads do
+		for Index, Value in next, self.Threads do
 			coroutine.close(Value)
 		end
 
@@ -821,7 +860,7 @@ do
 	end
 
 	Library.Disconnect = function(self, Name)
-		for _, Connection in self.Connections do
+		for _, Connection in next, self.Connections do
 			if Connection.Name == Name then
 				Connection.Connection:Disconnect()
 				break
@@ -842,8 +881,8 @@ do
 			Properties = Properties,
 		}
 
-		for Property, Value in ThemeData.Properties do
-			if type(Value) == "string" then
+		for Property, Value in next, ThemeData.Properties do
+			if typeof(Value) == "string" then
 				Item[Property] = self.Theme[Value]
 			else
 				Item[Property] = Value()
@@ -870,10 +909,10 @@ do
 		local Config = {}
 
 		local Success, Result = Library:SafeCall(function()
-			for Index, Value in Library.Flags do
-				if type(Value) == "table" and Value.Key then
+			for Index, Value in next, Library.Flags do
+				if typeof(Value) == "table" and Value.Key then
 					Config[Index] = { Key = tostring(Value.Key), Mode = Value.Mode }
-				elseif type(Value) == "table" and Value.Color then
+				elseif typeof(Value) == "table" and Value.Color then
 					Config[Index] = { Color = "#" .. Value.Color, Alpha = Value.Alpha }
 				else
 					Config[Index] = Value
@@ -888,16 +927,16 @@ do
 		local Decoded = HttpService:JSONDecode(Config)
 
 		local Success, Result = Library:SafeCall(function()
-			for Index, Value in Decoded do
+			for Index, Value in next, Decoded do
 				local SetFunction = Library.SetFlags[Index]
 
 				if not SetFunction then
 					continue
 				end
 
-				if type(Value) == "table" and Value.Key then
+				if typeof(Value) == "table" and Value.Key then
 					SetFunction(Value)
-				elseif type(Value) == "table" and Value.Color then
+				elseif typeof(Value) == "table" and Value.Color then
 					SetFunction(Value.Color, Value.Alpha)
 				else
 					SetFunction(Value)
@@ -920,7 +959,7 @@ do
 
 		local ConfigFolderName = StringGSub(Library.Folders.Configs, Library.Folders.Directory .. "/", "")
 
-		for Index, Value in listfiles(Library.Folders.Configs) do
+		for Index, Value in next, listfiles(Library.Folders.Configs) do
 			local FileName = StringGSub(Value, Library.Folders.Directory .. "\\" .. ConfigFolderName .. "\\", "")
 			List[Index] = FileName
 		end
@@ -954,11 +993,11 @@ do
 	Library.ChangeTheme = function(self, Theme, Color)
 		self.Theme[Theme] = Color
 
-		for _, Item in self.ThemeItems do
-			for Property, Value in Item.Properties do
-				if type(Value) == "string" and Value == Theme then
+		for _, Item in next, self.ThemeItems do
+			for Property, Value in next, Item.Properties do
+				if typeof(Value) == "string" and Value == Theme then
 					Item.Item[Property] = Color
-				elseif type(Value) == "function" then
+				elseif typeof(Value) == "function" then
 					Item.Item[Property] = Value()
 				end
 			end
@@ -970,7 +1009,8 @@ do
 		XOffset = XOffset or 0
 		YOffset = YOffset or 0
 
-		local MousePosition = Vector2New(Mouse.X + XOffset, Mouse.Y + YOffset)
+		local MouseLocation = UserInputService:GetMouseLocation()
+		local MousePosition = Vector2New(MouseLocation.X + XOffset, MouseLocation.Y + YOffset)
 
 		return MousePosition.X >= Frame.AbsolutePosition.X
 			and MousePosition.X <= Frame.AbsolutePosition.X + Frame.AbsoluteSize.X
@@ -1143,7 +1183,7 @@ do
 					BackgroundTransparency = 1,
 					Visible = false,
 					BorderColor3 = FromRGB(0, 0, 0),
-					Size = UDim2New(1, 0, 1, 0),
+					Size = UDim2FromScale(1, 1),
 					BackgroundColor3 = FromRGB(255, 255, 255),
 				})
 
@@ -1206,7 +1246,7 @@ do
 							AutomaticCanvasSize = Enum.AutomaticSize.Y,
 							ScrollBarThickness = 0,
 							BackgroundTransparency = 1,
-							Size = UDim2New(1, 0, 1, 0),
+							Size = UDim2FromScale(1, 1),
 							BackgroundColor3 = FromRGB(255, 255, 255),
 							BorderColor3 = FromRGB(0, 0, 0),
 							BorderSizePixel = 0,
@@ -1270,15 +1310,15 @@ do
 
 				local NewTween
 
-				for Index, Value in AllInstances do
+				for Index, Value in next, AllInstances do
 					local TransparencyProperty = Tween:GetProperty(Value)
 
 					if not TransparencyProperty then
 						continue
 					end
 
-					if type(TransparencyProperty) == "table" then
-						for _, Property in TransparencyProperty do
+					if typeof(TransparencyProperty) == "table" then
+						for _, Property in next, TransparencyProperty do
 							NewTween = Tween:FadeItem(Value, Property, Bool, Data.Window.FadeTime)
 						end
 					else
@@ -1292,7 +1332,7 @@ do
 			end
 
 			Items["Inactive"]:Connect("MouseButton1Down", function()
-				for Index, Value in Data.Window.Pages do
+				for Index, Value in next, Data.Window.Pages do
 					if Value == Page and Page.Active then
 						return
 					end
@@ -1454,7 +1494,7 @@ do
 						AutomaticCanvasSize = Enum.AutomaticSize.Y,
 						ScrollBarThickness = 0,
 						BackgroundTransparency = 1,
-						Size = UDim2New(1, 0, 1, 0),
+						Size = UDim2FromScale(1, 1),
 						BackgroundColor3 = FromRGB(255, 255, 255),
 						BorderColor3 = FromRGB(0, 0, 0),
 						BorderSizePixel = 0,
@@ -1517,15 +1557,15 @@ do
 
 				local NewTween
 
-				for Index, Value in AllInstances do
+				for Index, Value in next, AllInstances do
 					local TransparencyProperty = Tween:GetProperty(Value)
 
 					if not TransparencyProperty then
 						continue
 					end
 
-					if type(TransparencyProperty) == "table" then
-						for _, Property in TransparencyProperty do
+					if typeof(TransparencyProperty) == "table" then
+						for _, Property in next, TransparencyProperty do
 							NewTween = Tween:FadeItem(Value, Property, Bool, Data.Window.FadeTime)
 						end
 					else
@@ -1539,7 +1579,7 @@ do
 			end
 
 			Items["Inactive"]:Connect("MouseButton1Down", function()
-				for Index, Value in Data.Page.SubPages do
+				for Index, Value in next, Data.Page.SubPages do
 					if Value == SubPage and SubPage.Active then
 						return
 					end
@@ -1624,7 +1664,7 @@ do
 					ImageTransparency = 1,
 					BorderColor3 = FromRGB(0, 0, 0),
 					AnchorPoint = Vector2New(0.5, 0.5),
-					Image = "rbxassetid://108016671469439",
+					Image = Content.fromAssetId(108016671469439).Uri,
 					BackgroundTransparency = 1,
 					Position = UDim2New(0.5, 0, 0.5, 0),
 					Size = UDim2New(1, 2, 1, 2),
@@ -1836,7 +1876,7 @@ do
 						BorderColor3 = FromRGB(0, 0, 0),
 						Text = Name,
 						BackgroundTransparency = 1,
-						Size = UDim2New(1, 0, 1, 0),
+						Size = UDim2FromScale(1, 1),
 						BorderSizePixel = 0,
 						TextSize = 9,
 						BackgroundColor3 = FromRGB(255, 255, 255),
@@ -2089,8 +2129,9 @@ do
 				then
 					Slider.Sliding = true
 
-					local SizeX = (Mouse.X - Items["RealSlider"].Instance.AbsolutePosition.X)
-						/ Items["RealSlider"].Instance.AbsoluteSize.X
+					local SizeX = (
+						UserInputService:GetMouseLocation().X - Items["RealSlider"].Instance.AbsolutePosition.X
+					) / Items["RealSlider"].Instance.AbsoluteSize.X
 					local Value = ((Data.Max - Data.Min) * SizeX) + Data.Min
 
 					Slider:Set(Value)
@@ -2116,8 +2157,9 @@ do
 					or Input.UserInputType == Enum.UserInputType.Touch
 				then
 					if Slider.Sliding then
-						local SizeX = (Mouse.X - Items["RealSlider"].Instance.AbsolutePosition.X)
-							/ Items["RealSlider"].Instance.AbsoluteSize.X
+						local SizeX = (
+							UserInputService:GetMouseLocation().X - Items["RealSlider"].Instance.AbsolutePosition.X
+						) / Items["RealSlider"].Instance.AbsoluteSize.X
 						local Value = ((Data.Max - Data.Min) * SizeX) + Data.Min
 
 						Slider:Set(Value)
@@ -2321,7 +2363,7 @@ do
 					ScaleType = Enum.ScaleType.Fit,
 					BorderColor3 = FromRGB(0, 0, 0),
 					AnchorPoint = Vector2New(1, 0.5),
-					Image = "rbxassetid://113229176886493",
+					Image = Content.fromAssetId(113229176886493).Uri,
 					BackgroundTransparency = 1,
 					Position = UDim2New(1, -2, 0.5, 0),
 					Size = UDim2New(0, 20, 0, 20),
@@ -2404,7 +2446,7 @@ do
 					end)
 
 					if not Debounce then
-						for Index, Value in Library.OpenFrames do
+						for Index, Value in next, Library.OpenFrames do
 							if Value ~= Dropdown then
 								Value:SetOpen(false)
 							end
@@ -2432,15 +2474,15 @@ do
 
 				local NewTween
 
-				for Index, Value in Descendants do
+				for Index, Value in next, Descendants do
 					local TransparencyProperty = Tween:GetProperty(Value)
 
 					if not TransparencyProperty then
 						continue
 					end
 
-					if type(TransparencyProperty) == "table" then
-						for _, Property in TransparencyProperty do
+					if typeof(TransparencyProperty) == "table" then
+						for _, Property in next, TransparencyProperty do
 							NewTween = Tween:FadeItem(Value, Property, Bool, Library.FadeSpeed)
 						end
 					else
@@ -2463,14 +2505,14 @@ do
 
 			function Dropdown:Set(Option)
 				if Data.Multi then
-					if type(Option) ~= "table" then
+					if typeof(Option) ~= "table" then
 						return
 					end
 
 					Dropdown.Value = Option
 					Library.Flags[Dropdown.Flag] = Option
 
-					for Index, Value in Option do
+					for Index, Value in next, Option do
 						local OptionData = Dropdown.Options[Value]
 
 						if not OptionData then
@@ -2492,7 +2534,7 @@ do
 					Dropdown.Value = Option
 					Library.Flags[Dropdown.Flag] = Option
 
-					for Index, Value in Dropdown.Options do
+					for Index, Value in next, Dropdown.Options do
 						if Value ~= OptionData then
 							Value.Selected = false
 							Value:Toggle("Inactive")
@@ -2571,7 +2613,7 @@ do
 							OptionData.Selected = true
 							OptionData:Toggle("Active")
 
-							for Index, Value in Dropdown.Options do
+							for Index, Value in next, Dropdown.Options do
 								if Value ~= OptionData then
 									Value.Selected = false
 									Value:Toggle("Inactive")
@@ -2613,11 +2655,11 @@ do
 			end
 
 			function Dropdown:Refresh(List)
-				for Index, Value in Dropdown.Options do
+				for Index, Value in next, Dropdown.Options do
 					Dropdown:Remove(Value.Name)
 				end
 
-				for Index, Value in List do
+				for Index, Value in next, List do
 					Dropdown:Add(Value)
 				end
 			end
@@ -2653,7 +2695,7 @@ do
 				end
 			end)
 
-			for Index, Value in Data.Items do
+			for Index, Value in next, Data.Items do
 				Dropdown:Add(Value)
 			end
 
@@ -2688,7 +2730,7 @@ do
 					BorderColor3 = FromRGB(0, 0, 0),
 					Text = NewTab.Name,
 					AutoButtonColor = false,
-					Size = UDim2New(1, 0, 1, 0),
+					Size = UDim2FromScale(1, 1),
 					BorderSizePixel = 0,
 					TextSize = 9,
 					BackgroundColor3 = FromRGB(20, 24, 21),
@@ -2703,7 +2745,7 @@ do
 					Visible = false,
 					BackgroundTransparency = 1,
 					BorderColor3 = FromRGB(0, 0, 0),
-					Size = UDim2New(1, 0, 1, 0),
+					Size = UDim2FromScale(1, 1),
 					BorderSizePixel = 0,
 					BackgroundColor3 = FromRGB(255, 255, 255),
 				})
@@ -2728,7 +2770,7 @@ do
 			end
 
 			Items["Inactive"]:Connect("MouseButton1Down", function()
-				for Index, Value in Data.Stack do
+				for Index, Value in next, Data.Stack do
 					Value:Turn(Value == NewTab)
 				end
 			end)
@@ -2752,7 +2794,7 @@ do
 				BorderColor3 = FromRGB(42, 49, 45),
 				Text = "",
 				AutoButtonColor = false,
-				Position = UDim2New(0, 8, 0, 8),
+				Position = UDim2FromOffset(8, 8),
 				Size = UDim2New(1, -41, 1, -41),
 				BorderSizePixel = 2,
 				TextSize = 14,
@@ -2774,7 +2816,7 @@ do
 				BorderColor3 = FromRGB(0, 0, 0),
 				Image = Library:GetImage("Saturation"),
 				BackgroundTransparency = 1,
-				Size = UDim2New(1, 0, 1, 0),
+				Size = UDim2FromScale(1, 1),
 				ZIndex = 2,
 				BorderSizePixel = 0,
 				BackgroundColor3 = FromRGB(255, 255, 255),
@@ -2796,10 +2838,10 @@ do
 			Items["PaletteDragger"] = Instances:Create("Frame", {
 				Parent = Items["Palette"].Instance,
 				Name = "\0",
-				Position = UDim2New(0, 8, 0, 8),
+				Position = UDim2FromOffset(8, 8),
 				ZIndex = 5,
 				BorderColor3 = FromRGB(0, 0, 0),
-				Size = UDim2New(0, 2, 0, 2),
+				Size = UDim2FromOffset(2, 2),
 				BorderSizePixel = 0,
 				BackgroundColor3 = FromRGB(255, 255, 255),
 			})
@@ -2840,7 +2882,7 @@ do
 				AutoButtonColor = false,
 				Name = "\0",
 				BorderColor3 = FromRGB(0, 0, 0),
-				Size = UDim2New(1, 0, 1, 0),
+				Size = UDim2FromScale(1, 1),
 				BorderSizePixel = 0,
 				BackgroundColor3 = FromRGB(255, 255, 255),
 			})
@@ -2907,10 +2949,10 @@ do
 				Name = "\0",
 				ScaleType = Enum.ScaleType.Tile,
 				BorderColor3 = FromRGB(0, 0, 0),
-				TileSize = UDim2New(0, 6, 0, 6),
+				TileSize = UDim2FromOffset(6, 6),
 				Image = Library:GetImage("Checkers"),
 				BackgroundTransparency = 1,
-				Size = UDim2New(1, 0, 1, 0),
+				Size = UDim2FromScale(1, 1),
 				ZIndex = 2,
 				BorderSizePixel = 0,
 				BackgroundColor3 = FromRGB(255, 255, 255),
@@ -2992,7 +3034,7 @@ do
 				Items["ColorpickerButtonInline"] = Instances:Create("Frame", {
 					Parent = Items["ColorpickerButton"].Instance,
 					Name = "\0",
-					Position = UDim2New(0, 1, 0, 1),
+					Position = UDim2FromOffset(1, 1),
 					BorderColor3 = FromRGB(0, 0, 0),
 					Size = UDim2New(1, -2, 1, -2),
 					BorderSizePixel = 0,
@@ -3117,7 +3159,7 @@ do
 					BorderColor3 = FromRGB(42, 49, 45),
 					Text = "",
 					AutoButtonColor = false,
-					Position = UDim2New(0, 8, 0, 8),
+					Position = UDim2FromOffset(8, 8),
 					Size = UDim2New(1, -46, 1, -46),
 					BorderSizePixel = 2,
 					TextSize = 14,
@@ -3139,7 +3181,7 @@ do
 					BorderColor3 = FromRGB(0, 0, 0),
 					Image = Library:GetImage("Saturation"),
 					BackgroundTransparency = 1,
-					Size = UDim2New(1, 0, 1, 0),
+					Size = UDim2FromScale(1, 1),
 					ZIndex = 2,
 					BorderSizePixel = 0,
 					BackgroundColor3 = FromRGB(255, 255, 255),
@@ -3161,9 +3203,9 @@ do
 				Items["PaletteDragger"] = Instances:Create("Frame", {
 					Parent = Items["Palette"].Instance,
 					Name = "\0",
-					Position = UDim2New(0, 8, 0, 8),
+					Position = UDim2FromOffset(8, 8),
 					BorderColor3 = FromRGB(0, 0, 0),
-					Size = UDim2New(0, 2, 0, 2),
+					Size = UDim2FromOffset(2, 2),
 					BorderSizePixel = 0,
 					ZIndex = 5,
 					BackgroundColor3 = FromRGB(255, 255, 255),
@@ -3205,7 +3247,7 @@ do
 					Text = "",
 					Name = "\0",
 					BorderColor3 = FromRGB(0, 0, 0),
-					Size = UDim2New(1, 0, 1, 0),
+					Size = UDim2FromScale(1, 1),
 					BorderSizePixel = 0,
 					BackgroundColor3 = FromRGB(255, 255, 255),
 				})
@@ -3272,10 +3314,10 @@ do
 					Name = "\0",
 					ScaleType = Enum.ScaleType.Tile,
 					BorderColor3 = FromRGB(0, 0, 0),
-					TileSize = UDim2New(0, 6, 0, 6),
+					TileSize = UDim2FromOffset(6, 6),
 					Image = Library:GetImage("Checkers"),
 					BackgroundTransparency = 1,
-					Size = UDim2New(1, 0, 1, 0),
+					Size = UDim2FromScale(1, 1),
 					ZIndex = 2,
 					BorderSizePixel = 0,
 					BackgroundColor3 = FromRGB(255, 255, 255),
@@ -3332,8 +3374,10 @@ do
 							OldColor = Colorpicker.Color
 
 							Library:Thread(function()
-								while task.wait() do
-									local RainbowHue = MathAbs(MathSin(tick() * (AnimationSpeedSlider.Value / 25)))
+								local Time = 0
+								while true do
+									Time += task.wait() * (AnimationSpeedSlider.Value / 25)
+									local RainbowHue = MathAbs((Time % 2) - 1)
 									local Color = FromHSV(RainbowHue, 1, 1)
 
 									Colorpicker:Set(Color, Colorpicker.Alpha)
@@ -3355,8 +3399,10 @@ do
 								OldColor = Colorpicker.Color
 
 								Library:Thread(function()
-									while task.wait() do
-										local Speed = MathAbs(MathSin(tick() * (AnimationSpeedSlider.Value / 25)))
+									local Time = 0
+									while true do
+										Time += task.wait() * (AnimationSpeedSlider.Value / 25)
+										local Speed = MathAbs((Time % 2) - 1)
 										Colorpicker:Set(
 											KeyframeOneColorpicker.Color:Lerp(FromRGB(0, 0, 0), Speed),
 											Colorpicker.Alpha
@@ -3380,8 +3426,10 @@ do
 								OldColor = Colorpicker.Alpha
 
 								Library:Thread(function()
-									while task.wait() do
-										local AlphaValue = MathAbs(MathSin(tick() * (AnimationSpeedSlider.Value / 25)))
+									local Time = 0
+									while true do
+										Time += task.wait() * (AnimationSpeedSlider.Value / 25)
+										local AlphaValue = MathAbs((Time % 2) - 1)
 										Colorpicker:Set(Colorpicker.Color, AlphaValue)
 										UpdateSync(true)
 
@@ -3402,8 +3450,10 @@ do
 								OldColor = Colorpicker.Color
 
 								Library:Thread(function()
-									while task.wait() do
-										local Speed = MathAbs(MathSin(tick() * (AnimationSpeedSlider.Value / 25)))
+									local Time = 0
+									while true do
+										Time += task.wait() * (AnimationSpeedSlider.Value / 25)
+										local Speed = MathAbs((Time % 2) - 1)
 										Colorpicker:Set(
 											KeyframeOneColorpicker.Color:Lerp(KeyframeTwoColorpicker.Color, Speed),
 											Colorpicker.Alpha
@@ -3479,7 +3529,7 @@ do
 				Items["CurrentColor"] = Instances:Create("Frame", {
 					Parent = OtherTabItems["PageContent"].Instance,
 					Name = "\0",
-					Position = UDim2New(0, 8, 0, 8),
+					Position = UDim2FromOffset(8, 8),
 					BorderColor3 = FromRGB(42, 49, 45),
 					Size = UDim2New(1, -16, 0, 50),
 					BorderSizePixel = 2,
@@ -3585,12 +3635,12 @@ do
 					Callback = function(Value)
 						IsSyncToggled = Value
 						if Value then
-							for Index, Value in Library.Colorpickers do
+							for Index, Value in next, Library.Colorpickers do
 								Stash[Value] = Value.Color
 								Value:Set(Colorpicker.Color)
 							end
 						else
-							for Index, Value in Library.Colorpickers do
+							for Index, Value in next, Library.Colorpickers do
 								if Stash[Value] then
 									Value:Set(Stash[Value])
 								end
@@ -3631,7 +3681,7 @@ do
 					end)
 
 					if not Data.Debounce then
-						for Index, Value in Library.OpenFrames do
+						for Index, Value in next, Library.OpenFrames do
 							if Value ~= Colorpicker and Value ~= AnimationsDropdownItems then
 								Value:SetOpen(false)
 							end
@@ -3657,15 +3707,15 @@ do
 
 				local NewTween
 
-				for Index, Value in Descendants do
+				for Index, Value in next, Descendants do
 					local TransparencyProperty = Tween:GetProperty(Value)
 
 					if not TransparencyProperty then
 						continue
 					end
 
-					if type(TransparencyProperty) == "table" then
-						for _, Property in TransparencyProperty do
+					if typeof(TransparencyProperty) == "table" then
+						for _, Property in next, TransparencyProperty do
 							NewTween = Tween:FadeItem(Value, Property, Bool, Library.FadeSpeed)
 						end
 					else
@@ -3685,7 +3735,7 @@ do
 
 			UpdateSync = function(Bool)
 				if IsSyncToggled and Bool then
-					for Index, Value in Library.Colorpickers do
+					for Index, Value in next, Library.Colorpickers do
 						if Value ~= Colorpicker and not StringFind(Value.Flag, "Theme") then
 							Value:Set(Colorpicker.Color)
 						end
@@ -3735,10 +3785,10 @@ do
 			end
 
 			function Colorpicker:Set(Color, Alpha)
-				if type(Color) == "table" then
+				if typeof(Color) == "table" then
 					Color = FromRGB(Color[1], Color[2], Color[3])
 					Alpha = Color[4]
-				elseif type(Color) == "string" then
+				elseif typeof(Color) == "string" then
 					Color = FromHex(Color)
 				end
 
@@ -4072,7 +4122,7 @@ do
 					BorderColor3 = FromRGB(0, 0, 0),
 					Text = "Toggle",
 					AutoButtonColor = false,
-					Position = UDim2New(0, 8, 0, 8),
+					Position = UDim2FromOffset(8, 8),
 					Size = UDim2New(1, -16, 0, 20),
 					BorderSizePixel = 0,
 					TextSize = 9,
@@ -4170,7 +4220,7 @@ do
 					end
 
 					Update()
-				elseif type(Key) == "table" then
+				elseif typeof(Key) == "table" then
 					local RealKey = Key.Key == "Backspace" and "None" or Key.Key
 					Keybind.Key = tostring(Key.Key)
 
@@ -4239,7 +4289,7 @@ do
 					end)
 
 					if not Debounce then
-						for Index, Value in Library.OpenFrames do
+						for Index, Value in next, Library.OpenFrames do
 							if Value ~= Keybind then
 								Value:SetOpen(false)
 							end
@@ -4265,15 +4315,15 @@ do
 
 				local NewTween
 
-				for Index, Value in Descendants do
+				for Index, Value in next, Descendants do
 					local TransparencyProperty = Tween:GetProperty(Value)
 
 					if not TransparencyProperty then
 						continue
 					end
 
-					if type(TransparencyProperty) == "table" then
-						for _, Property in TransparencyProperty do
+					if typeof(TransparencyProperty) == "table" then
+						for _, Property in next, TransparencyProperty do
 							NewTween = Tween:FadeItem(Value, Property, Bool, Library.FadeSpeed)
 						end
 					else
@@ -4291,7 +4341,7 @@ do
 			end
 
 			function Keybind:SetMode(Mode)
-				for Index, Value in Modes do
+				for Index, Value in next, Modes do
 					if Index == Mode then
 						Value:Tween(nil, { BackgroundTransparency = 0 })
 					else
@@ -4537,7 +4587,7 @@ do
 					PlaceholderColor3 = FromRGB(185, 185, 185),
 					PlaceholderText = Data.Placeholder,
 					TextSize = 9,
-					Size = UDim2New(1, 0, 1, 0),
+					Size = UDim2FromScale(1, 1),
 					ClipsDescendants = true,
 					BorderColor3 = FromRGB(0, 0, 0),
 					Text = "",
@@ -4655,7 +4705,7 @@ do
 					ScaleType = Enum.ScaleType.Fit,
 					BorderColor3 = FromRGB(0, 0, 0),
 					AnchorPoint = Vector2New(0, 0.5),
-					Image = "rbxassetid://71197946135150",
+					Image = Content.fromAssetId(71197946135150).Uri,
 					BackgroundTransparency = 1,
 					Position = UDim2New(0, 0, 0.5, 0),
 					Size = UDim2New(0, 16, 0, 16),
@@ -4740,14 +4790,14 @@ do
 					BorderSizePixel = 0,
 					CanvasSize = UDim2New(0, 0, 0, 0),
 					ScrollBarImageColor3 = FromRGB(202, 243, 255),
-					MidImage = "rbxassetid://136419474381965",
+					MidImage = Content.fromAssetId(136419474381965).Uri,
 					BorderColor3 = FromRGB(0, 0, 0),
 					ScrollBarThickness = 2,
 					Size = UDim2New(1, -12, 1, -10),
 					Position = UDim2New(0, 3, 0, 5),
-					TopImage = "rbxassetid://136419474381965",
+					TopImage = Content.fromAssetId(136419474381965).Uri,
 					CanvasPosition = Vector2New(0, 57),
-					BottomImage = "rbxassetid://136419474381965",
+					BottomImage = Content.fromAssetId(136419474381965).Uri,
 					BackgroundTransparency = 1,
 					BackgroundColor3 = FromRGB(255, 255, 255),
 				})
@@ -4778,14 +4828,14 @@ do
 
 			function Dropdown:Set(Option)
 				if Data.Multi then
-					if type(Option) ~= "table" then
+					if typeof(Option) ~= "table" then
 						return
 					end
 
 					Dropdown.Value = Option
 					Library.Flags[Dropdown.Flag] = Option
 
-					for Index, Value in Option do
+					for Index, Value in next, Option do
 						local OptionData = Dropdown.Options[Value]
 
 						if not OptionData then
@@ -4805,7 +4855,7 @@ do
 					Dropdown.Value = Option
 					Library.Flags[Dropdown.Flag] = Option
 
-					for Index, Value in Dropdown.Options do
+					for Index, Value in next, Dropdown.Options do
 						if Value ~= OptionData then
 							Value.Selected = false
 							Value:Toggle("Inactive")
@@ -4881,7 +4931,7 @@ do
 							OptionData.Selected = true
 							OptionData:Toggle("Active")
 
-							for Index, Value in Dropdown.Options do
+							for Index, Value in next, Dropdown.Options do
 								if Value ~= OptionData then
 									Value.Selected = false
 									Value:Toggle("Inactive")
@@ -4919,11 +4969,11 @@ do
 			end
 
 			function Dropdown:Refresh(List)
-				for Index, Value in Dropdown.Options do
+				for Index, Value in next, Dropdown.Options do
 					Dropdown:Remove(Value.Name)
 				end
 
-				for Index, Value in List do
+				for Index, Value in next, List do
 					Dropdown:Add(Value)
 				end
 			end
@@ -4942,7 +4992,7 @@ do
 
 			Items["Input"]:Connect("Focused", function()
 				SearchStepped = RunService.RenderStepped:Connect(function()
-					for Index, Value in Dropdown.Options do
+					for Index, Value in next, Dropdown.Options do
 						if Items["Input"].Instance.Text ~= "" then
 							if StringFind(StringLower(Value.Name), StringLower(Items["Input"].Instance.Text)) then
 								Value.Button.Instance.Visible = true
@@ -4963,7 +5013,7 @@ do
 				end
 			end)
 
-			for Index, Value in Data.Items do
+			for Index, Value in next, Data.Items do
 				Dropdown:Add(Value)
 			end
 
@@ -5270,7 +5320,7 @@ do
 
 		local Size = Items["Notification"].Instance.AbsoluteSize
 
-		for Index, Value in Items do
+		for Index, Value in next, Items do
 			if Value.Instance:IsA("Frame") then
 				Value.Instance.BackgroundTransparency = 1
 			elseif Value.Instance:IsA("TextLabel") then
@@ -5283,7 +5333,7 @@ do
 		Items["Notification"].Instance.AutomaticSize = Enum.AutomaticSize.Y
 
 		Library:Thread(function()
-			for Index, Value in Items do
+			for Index, Value in next, Items do
 				if Value.Instance:IsA("Frame") then
 					Value:Tween(nil, { BackgroundTransparency = 0 })
 				elseif Value.Instance:IsA("TextLabel") and Index ~= "Description" then
@@ -5302,7 +5352,7 @@ do
 			)
 
 			task.delay(Duration + 0.1, function()
-				for Index, Value in Items do
+				for Index, Value in next, Items do
 					if Value.Instance:IsA("Frame") then
 						Value:Tween(nil, { BackgroundTransparency = 1 })
 					elseif Value.Instance:IsA("TextLabel") then
@@ -5388,14 +5438,14 @@ do
 				BorderSizePixel = 0,
 				CanvasSize = UDim2New(0, 0, 0, 0),
 				ScrollBarImageColor3 = FromRGB(202, 243, 255),
-				MidImage = "rbxassetid://123708228368098",
+				MidImage = Content.fromAssetId(123708228368098).Uri,
 				BorderColor3 = FromRGB(0, 0, 0),
 				ScrollBarThickness = 2,
 				Size = UDim2New(1, -4, 1, -8),
 				BackgroundTransparency = 1,
 				Position = UDim2New(0, 0, 0, 4),
-				BottomImage = "rbxassetid://123708228368098",
-				TopImage = "rbxassetid://123708228368098",
+				BottomImage = Content.fromAssetId(123708228368098).Uri,
+				TopImage = Content.fromAssetId(123708228368098).Uri,
 				BackgroundColor3 = FromRGB(255, 255, 255),
 			})
 			Items["Holder"]:AddToTheme({ ScrollBarImageColor3 = "Accent" })
@@ -5516,7 +5566,7 @@ do
 					ScaleType = Enum.ScaleType.Fit,
 					BorderColor3 = FromRGB(0, 0, 0),
 					AnchorPoint = Vector2New(0.5, 0.5),
-					Image = "rbxassetid://" .. Image,
+					Image = Content.fromAssetId(Image).Uri,
 					BackgroundTransparency = 1,
 					Position = UDim2New(0.5, 0, 0.5, 0),
 					Size = UDim2New(0, 45, 0, 45),
@@ -5536,7 +5586,7 @@ do
 		end
 
 		function Viewer:RemoveAllTools()
-			for Index, Value in Viewer.Items do
+			for Index, Value in next, Viewer.Items do
 				Value:Remove()
 			end
 		end
@@ -5589,7 +5639,7 @@ do
 				ScaleType = Enum.ScaleType.Fit,
 				BorderColor3 = FromRGB(0, 0, 0),
 				AnchorPoint = Vector2New(0.5, 0),
-				Image = "rbxassetid://" .. Window.Logo,
+				Image = Content.fromAssetId(Window.Logo).Uri,
 				BackgroundTransparency = 1,
 				Position = UDim2New(0.5, 0, 0, 12),
 				Size = UDim2New(0, 75, 0, 75),
@@ -5620,7 +5670,7 @@ do
 				ScaleType = Enum.ScaleType.Fit,
 				BorderColor3 = FromRGB(0, 0, 0),
 				AnchorPoint = Vector2New(0, 0.5),
-				Image = "rbxassetid://71197946135150",
+				Image = Content.fromAssetId(71197946135150).Uri,
 				BackgroundTransparency = 1,
 				Position = UDim2New(0, 0, 0.5, 0),
 				Size = UDim2New(0, 16, 0, 16),
@@ -5736,9 +5786,9 @@ do
 				Parent = Items["MouseBackground"].Instance,
 				Name = "\0",
 				BorderColor3 = FromRGB(0, 0, 0),
-				Image = "rbxassetid://76631660114196",
+				Image = Content.fromAssetId(76631660114196).Uri,
 				BackgroundTransparency = 1,
-				Size = UDim2New(1, 0, 1, 0),
+				Size = UDim2FromScale(1, 1),
 				BorderSizePixel = 0,
 				ZIndex = 9999,
 				BackgroundColor3 = FromRGB(255, 255, 255),
@@ -5819,15 +5869,15 @@ do
 
 			local NewTween
 
-			for Index, Value in Descendants do
+			for Index, Value in next, Descendants do
 				local TransparencyProperty = Tween:GetProperty(Value)
 
 				if not TransparencyProperty then
 					continue
 				end
 
-				if type(TransparencyProperty) == "table" then
-					for _, Property in TransparencyProperty do
+				if typeof(TransparencyProperty) == "table" then
+					for _, Property in next, TransparencyProperty do
 						NewTween = Tween:FadeItem(Value, Property, Bool, Library.FadeSpeed)
 					end
 				else
@@ -5867,7 +5917,7 @@ do
 			end
 
 			SearchStepped = RunService.RenderStepped:Connect(function()
-				for Index, Value in PageSearchData do
+				for Index, Value in next, PageSearchData do
 					local Name = Value.Name
 					local Element = Value.Element
 
@@ -5887,17 +5937,14 @@ do
 						end
 					else
 						Window:AddToOldSizes(Element, Element.Instance.Size)
-						Element:Tween(
-							TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-							{
-								Size = UDim2New(
-									Window:GetOldSize(Element).X.Scale,
-									Window:GetOldSize(Element).X.Offset,
-									0,
-									0
-								),
-							}
-						)
+						Element:Tween(TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+							Size = UDim2New(
+								Window:GetOldSize(Element).X.Scale,
+								Window:GetOldSize(Element).X.Offset,
+								0,
+								0
+							),
+						})
 						task.wait(0.1)
 						Element.Instance.Visible = false
 					end
@@ -6035,7 +6082,7 @@ do
 				Text = Section.Name,
 				Size = UDim2New(0, 0, 0, 15),
 				BackgroundTransparency = 1,
-				Position = UDim2New(0, 6, 0, 5),
+				Position = UDim2FromOffset(6, 5),
 				BorderSizePixel = 0,
 				AutomaticSize = Enum.AutomaticSize.X,
 				TextSize = 9,
@@ -6473,7 +6520,7 @@ do
 			do
 				local ThemesSection = ThemingSubPage:Section({ Name = "Themes", Side = 1 })
 				do
-					for Index, Value in Library.Theme do
+					for Index, Value in next, Library.Theme do
 						ThemesSection:Label(Index):Colorpicker({
 							Name = Index,
 							Flag = Index .. "Theme",
@@ -6674,329 +6721,4 @@ do
 	end
 end
 
---[[
-local Window = Library:Window({
-    Logo = "77218680285262",
-    FadeTime = 0.3,
-})
-
-local Watermark = Library:Watermark("This is a watermark")
-local KeybindList = Library:KeybindList()
-
-do 
-    local CombatPage = Window:Page({Name = "Combat", SubPages = true})
-    local PlayerPage = Window:Page({Name = "Player", Columns = 2})
-    local VisualsPage = Window:Page({Name = "Visuals", Columns = 2})
-    local PlayersPage = Window:Page({Name = "Players", Columns = 2})
-    local SettingsPage = Library:CreateSettingsPage(Window, Watermark, KeybindList) 
-    
-    do -- Combat page
-        local WeaponSubPage = CombatPage:SubPage({Name = "Weapon", Columns = 2})
-        local AimbotSubPage = CombatPage:SubPage({Name = "Aimbot", Columns = 2}) 
-
-        do -- Weapon subpage
-            local RangedWeaponSection = WeaponSubPage:Section({Name = "Ranged Weapons", Side = 1}) do -- Ranged weapon section
-                RangedWeaponSection:Toggle({
-                    Name = "Enabled",
-                    Flag = "RangedWeaponEnabled",
-                    Default = false,
-                    Callback = function(Value)
-                        print(Value)
-                    end
-                })
-
-                --Toggle:SetVisibility(<bool>) -> nil
-                --Toggle:Set(<bool>) -> nil
-                --Toggle:Get(<void>) -> Toggle.Value
-
-                RangedWeaponSection:Toggle({
-                    Name = "Instant hit",
-                    Flag = "RangedWeaponInstantHit",
-                    Default = false,
-                    Callback = function(Value)
-                        print(Value)
-                    end
-                })
-
-                --Toggle:SetVisibility(<bool>) -> nil
-                --Toggle:Set(<bool>) -> nil
-                --Toggle:Get(<void>) -> Toggle.Value
-
-                RangedWeaponSection:Toggle({
-                    Name = "Rapid fire",
-                    Flag = "RangedWeaponRapidFire",
-                    Default = false,
-                    Callback = function(Value)
-                        print(Value)
-                    end
-                })
-
-                --Toggle:SetVisibility(<bool>) -> nil
-                --Toggle:Set(<bool>) -> nil
-                --Toggle:Get(<void>) -> Toggle.Value
-
-                RangedWeaponSection:Toggle({
-                    Name = "Full auto",
-                    Flag = "RangedWeaponFullAuto",
-                    Default = false,
-                    Callback = function(Value)
-                        print(Value)
-                    end
-                })
-
-                --Toggle:SetVisibility(<bool>) -> nil
-                --Toggle:Set(<bool>) -> nil
-                --Toggle:Get(<void>) -> Toggle.Value
-
-                RangedWeaponSection:Slider({
-                    Name = "Reload time",
-                    Flag = "RangedWeaponReloadTime",
-                    Min = 0,
-                    Suffix = "s",
-                    Max = 5,
-                    Default = 0,
-                    Decimals = 0.01,
-                    Callback = function(Value)
-                        print(Value)
-                    end
-                })
-
-                --Slider:SetVisibility(<bool>) -> nil
-                --Slider:Set(<number>) -> nil
-                --Slider:Get(<void>) -> Slider.Value
-
-                RangedWeaponSection:Dropdown({
-                    Name = "Mode",
-                    Items = {"Burst", "Auto", "Single"},
-                    Flag = "RangedWeaponMode",
-                    Default = "Burst",
-                    Multi = false,
-                    Callback = function(Value)
-                        print(Value)
-                    end
-                })
-
-                --Dropdown:SetVisibility(<bool>) -> nil
-                --Dropdown:Set(<string>) -> nil
-                --Dropdown:Get(<void>) -> Dropdown.Value
-                --Dropdown:Add(<string>) -> OptionData
-                --Dropdown:Remove(<string>) -> nil
-                --Dropdown:Refresh(<table>, <boolean>) -> nil   
-
-                local Button = RangedWeaponSection:Button()
-                Button:Add("Apply", function()
-                    print("Pressed")
-                end)
-                Button:Add("Reset", function()
-                    print("Pressed 2")
-                end)
-
-                --Button:Add(<string>, <function>)
-            end
-        end
-
-        do -- Aimbot subpage
-            local SilentAimSection = AimbotSubPage:Section({Name = "Silent Aim", Side = 1}) do -- Silent aim section
-                SilentAimSection:Toggle({
-                    Name = "Enabled",
-                    Flag = "SilentAimEnabled",
-                    Default = false,
-                    Callback = function(Value)
-                        print(Value)
-                    end
-                })
-
-                --Toggle:SetVisibility(<bool>) -> nil
-                --Toggle:Set(<bool>) -> nil
-                --Toggle:Get(<void>) -> Toggle.Value
-
-                local Toggle = SilentAimSection:Toggle({
-                    Name = "FoV Circle",
-                    Flag = "SilentAimFoVEnabled",
-                    Default = false,
-                    Callback = function(Value)
-                        print(Value)
-                    end
-                })
-
-                --Toggle:SetVisibility(<bool>) -> nil
-                --Toggle:Set(<bool>) -> nil
-                --Toggle:Get(<void>) -> Toggle.Value
-
-                Toggle:Colorpicker({
-                    Name = "FoV",
-                    Flag = "SilentAimFoV",
-                    Default = Library.Theme.Accent,
-                    Alpha = 0,
-                    Callback = function(Value)
-                        print(Value)
-                    end
-                })
-
-                --Colorpicker:SetVisibility(<bool>) -> nil
-                --Colorpicker:Set(<Color3>) -> nil
-                --Colorpicker:Get(<void>) -> Color3
-                --Colorpicker:SlidePalette(<InputObject>) -> nil
-                --Colorpicker:SlideHue(<InputObject>) -> nil
-                --Colorpicker:SlideAlpha(<InputObject>) -> nil
-                --Colorpicker:Update(<boolean>, <boolean>) -> nil
-                --Colorpicker:Set(<Color3>, <number>) -> nil
-
-                Toggle:Colorpicker({
-                    Name = "FoV",
-                    Flag = "SilentAimFoVOutline",
-                    Default = Color3.fromRGB(0, 0, 0),
-                    Alpha = 0,
-                    Callback = function(Value)
-                        print(Value)
-                    end
-                })
-
-                --Colorpicker:SetVisibility(<bool>) -> nil
-                --Colorpicker:Set(<Color3>) -> nil
-                --Colorpicker:Get(<void>) -> Color3
-                --Colorpicker:SlidePalette(<InputObject>) -> nil
-                --Colorpicker:SlideHue(<InputObject>) -> nil
-                --Colorpicker:SlideAlpha(<InputObject>) -> nil
-                --Colorpicker:Update(<boolean>, <boolean>) -> nil
-                --Colorpicker:Set(<Color3>, <number>) -> nil
-
-                SilentAimSection:Dropdown({
-                    Name = "Bone",
-                    Flag = "SilentAimBone",
-                    Default = "Head",
-                    Multi = false,
-                    Items = {"Head", "Penis", "Ass", "Thigh", "Tits"},
-                    Callback = function(Value)
-                        print(Value)
-                    end
-                })
-
-                --Dropdown:SetVisibility(<bool>) -> nil
-                --Dropdown:Set(<string>) -> nil
-                --Dropdown:Get(<void>) -> Dropdown.Value
-                --Dropdown:Add(<string>) -> OptionData
-                --Dropdown:Remove(<string>) -> nil
-                --Dropdown:Refresh(<table>, <boolean>) -> nil   
-
-                SilentAimSection:Toggle({
-                    Name = "Manipulation",
-                    Flag = "SilentAimManipulation",
-                    Default = false,
-                    Callback = function(Value)
-                        print(Value)
-                    end
-                })
-
-                --Toggle:SetVisibility(<bool>) -> nil
-                --Toggle:Set(<bool>) -> nil
-                --Toggle:Get(<void>) -> Toggle.Value
-
-                SilentAimSection:Slider({
-                    Name = "Radius",
-                    Flag = "FoVRadius",
-                    Min = 1,
-                    Suffix = "px",
-                    Max = 500,
-                    Default = 75,
-                    Decimals = 1,
-                    Callback = function(Value)
-                        print(Value)
-                    end
-                })
-
-                --Slider:SetVisibility(<bool>) -> nil
-                --Slider:Set(<number>) -> nil
-                --Slider:Get(<void>) -> Slider.Value
-
-                SilentAimSection:Toggle({
-                    Name = "Wall Check",
-                    Flag = "SilentAimFoVWallCheck",
-                    Default = false,
-                    Callback = function(Value)
-                        print(Value)
-                    end
-                })
-
-                --Toggle:SetVisibility(<bool>) -> nil
-                --Toggle:Set(<bool>) -> nil
-                --Toggle:Get(<void>) -> Toggle.Value
-
-                SilentAimSection:Toggle({
-                    Name = "Team Check",
-                    Flag = "SilentAimFoVTeamCheck",
-                    Default = false,
-                    Callback = function(Value)
-                        print(Value)
-                    end
-                })
-
-                --Toggle:SetVisibility(<bool>) -> nil
-                --Toggle:Set(<bool>) -> nil
-                --Toggle:Get(<void>) -> Toggle.Value
-
-                SilentAimSection:Toggle({
-                    Name = "Death Check",
-                    Flag = "SilentAimFoVDeathCheck",
-                    Default = false,
-                    Callback = function(Value)
-                        print(Value)
-                    end
-                })
-
-                --Toggle:SetVisibility(<bool>) -> nil
-                --Toggle:Set(<bool>) -> nil
-                --Toggle:Get(<void>) -> Toggle.Value
-            end
-
-            local AimbotSection = AimbotSubPage:Section({Name = "Camera", Side = 2}) do -- Aimbot section
-                AimbotSection:Toggle({
-                    Name = "Enabled",
-                    Flag = "AimbotEnabled",
-                    Default = false,
-                    Callback = function(Value)
-                        print(Value)
-                    end
-                }):Keybind({
-                    Flag = "AimbotKeybind",
-                    Default = Enum.KeyCode.E,
-                    Mode = "Toggle",
-                    Callback = function(Value)
-                        print(Value)
-                    end
-                })
-
-                --Toggle:SetVisibility(<bool>) -> nil
-                --Toggle:Set(<bool>) -> nil
-                --Toggle:Get(<void>) -> Toggle.Value
-
-                --Keybind:Get(<void>) -> Keybind.Key, Keybind.Mode, Keybind.Toggled
-                --Keybind:Set(<EnumItem>/<table>/<string>) -> nil
-                --Keybind:SetMode(<string>) -> nil
-                --Keybind:Press(<void>) -> nil
-
-                AimbotSection:Searchbox({
-                    Name = "Searchbox",
-                    Flag = "Searchbox",
-                    Items = {"Option 1", "Option 2", "Option 3", "Option 4", "Option 5", "Option 6", "Option 7", "Option 8", "Option 9", "Option 10", "Option 11"},
-                    Multi = false,
-                    Default = "Option 1",
-                    Callback = function(Value)
-                        print(Value)
-                    end
-                })
-
-                --Searchbox:SetVisibility(<bool>) -> nil
-                --Searchbox:Set(<string>) -> nil
-                --Searchbox:Get(<void>) -> Searchbox.Value
-                --Searchbox:Add(<string>) -> OptionData
-                --Searchbox:Remove(<string>) -> nil
-                --Searchbox:Refresh(<table>, <boolean>) -> nil   
-            end
-        end
-    end
-end
-
-Library:Notification("Loaded!", "Menu took "..string.format("%.4f", os.clock() - LoadTick).." seconds to load", 5)
-]]
 return Library
