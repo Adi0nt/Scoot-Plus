@@ -1051,7 +1051,7 @@ do
 				if Data.Resizeable then
 					Items["Window"]:MakeResizeable(
 						Vector2New(Data.Size.X.Offset, Data.Size.Y.Offset),
-						Vector2New(9999, 9999)
+						Vector2New(2147483647, 2147483647)
 					)
 				end
 
@@ -5782,7 +5782,7 @@ do
 				BorderColor3 = FromRGB(0, 0, 0),
 				Size = UDim2New(0, 16, 0, 16),
 				BorderSizePixel = 0,
-				ZIndex = 9999,
+				ZIndex = 2147483647,
 				BackgroundColor3 = FromRGB(255, 255, 255),
 			})
 
@@ -5794,7 +5794,7 @@ do
 				BackgroundTransparency = 1,
 				Size = UDim2FromScale(1, 1),
 				BorderSizePixel = 0,
-				ZIndex = 9999,
+				ZIndex = 2147483647,
 				BackgroundColor3 = FromRGB(255, 255, 255),
 			})
 			Items["MouseImage"]:AddToTheme({ ImageColor3 = "Accent" })
@@ -5838,7 +5838,7 @@ do
 
 		Library:Connect(RunService.RenderStepped, function()
 			local MouseLocation = UserInputService:GetMouseLocation()
-			Items["MouseBackground"].Instance.Position = UDim2New(0, MouseLocation.X - 1, 0, MouseLocation.Y - 56)
+			Items["MouseBackground"].Instance.Position = UDim2FromOffset(MouseLocation.X - 1, MouseLocation.Y - 56)
 		end)
 
 		local OldSizes = {}
