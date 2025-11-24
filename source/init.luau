@@ -315,7 +315,6 @@ do
 
 		Tween.GetProperty = function(self, Item)
 			Item = Item or self.Item
-
 			if Item:IsA("Frame") then
 				return { "BackgroundTransparency" }
 			elseif Item:IsA("TextLabel") or Item:IsA("TextButton") then
