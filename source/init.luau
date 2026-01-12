@@ -1988,6 +1988,10 @@ do
 				end
 			end
 
+			function Toggle:Changed(Function)
+				Data.Callback = Function
+			end
+
 			function Toggle:Get()
 				return Toggle.Value
 			end
@@ -2356,6 +2360,10 @@ do
 				Items["Value"]:TextBorder()
 			end
 
+			function Slider:Changed(Function)
+				Data.Callback = Function
+			end
+
 			function Slider:Get()
 				return Slider.Value
 			end
@@ -2680,6 +2688,10 @@ do
 					Padding = UDimNew(0, 3),
 					SortOrder = Enum.SortOrder.LayoutOrder,
 				})
+			end
+
+			function Dropdown:Changed(Function)
+				Data.Callback = Function
 			end
 
 			function Dropdown:Get()
@@ -3924,6 +3936,10 @@ do
 			local Debounce = false
 			local RenderStepped
 
+			function Colorpicker:Changed(Function)
+				Data.Callback = Function
+			end
+
 			function Colorpicker:SetOpen(Bool)
 				if Debounce then
 					return
@@ -4452,6 +4468,10 @@ do
 				end
 			end
 
+			function Keybind:Changed(Function)
+				Data.Callback = Function
+			end
+
 			function Keybind:Get()
 				return Keybind.Key, Keybind.Mode, Keybind.Toggled
 			end
@@ -4871,6 +4891,10 @@ do
 				})
 			end
 
+			function Textbox:Changed(Function)
+				Data.Callback = Function
+			end
+
 			function Textbox:Get()
 				return Textbox.Value
 			end
@@ -5076,6 +5100,10 @@ do
 					PaddingBottom = UDimNew(0, 8),
 					PaddingLeft = UDimNew(0, 5),
 				})
+			end
+
+			function Dropdown:Changed(Function)
+				Data.Callback = Function
 			end
 
 			function Dropdown:Get()
