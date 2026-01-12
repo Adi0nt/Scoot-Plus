@@ -262,18 +262,18 @@ do
 			["Accent"] = FromRGB(253, 133, 21),
 		},
 		["Aqua"] = {
-			["Background"] = FromRGB(71, 84, 99),
+			["Background"] = FromRGB(19, 21, 23),
 			["Border"] = FromRGB(48, 56, 63),
 			["Inline"] = FromRGB(31, 35, 39),
 			["Hovered Element"] = Library:GetLighterColor(FromRGB(58, 66, 77), 1.45),
-			["Page Background"] = FromRGB(22, 25, 28),
-			["Outline"] = FromRGB(20, 25, 30),
+			["Page Background"] = FromRGB(71, 84, 99),
+			["Outline"] = FromRGB(0, 0, 0),
 			["Element"] = FromRGB(58, 66, 77),
 			["Gradient"] = FromRGB(211, 211, 211),
-			["Text"] = FromRGB(255, 255, 255),
+			["Text"] = FromRGB(245, 245, 245),
 			["Text Stroke"] = FromRGB(0, 0, 0),
 			["Placeholder Text"] = FromRGB(185, 185, 185),
-			["Accent"] = FromRGB(104, 214, 255),
+			["Accent"] = FromRGB(31, 106, 181),
 		},
 		["Onetap"] = {
 			["Background"] = FromRGB(51, 51, 51),
@@ -1156,9 +1156,8 @@ do
 
 		local Success, Result = Library:SafeCall(function()
 			for Index, Value in Library.Flags do
-				if type(Value) == "table" and Value.Color and StringFind(Value.Flag, "Theme") then
+				if type(Value) == "table" and Value.Color and StringFind(Index, "Theme") then
 					Theme[Index] = { Color = Value.HexValue, Alpha = Value.Alpha }
-				else
 				end
 			end
 		end)
