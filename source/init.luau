@@ -6,7 +6,9 @@
     example/documentation is at the bottom
 ]]
 local LoadTick = os.clock()
-local TextSize = 4
+local TextSize = 0
+
+local Typeface = loadstring(game:HttpGet("https://github.com/fayvrit/Typeface/raw/refs/heads/main/Register.lua"))()
 
 local Library
 do
@@ -852,7 +854,7 @@ do
 		end
 	end
 
-	local CustomFont = {}
+	--[[local CustomFont = {}
 	do
 		function CustomFont:New(Name, Weight, Style, Data)
 			if isfile(Library.Folders.Assets .. "/" .. Name .. ".json") then
@@ -890,7 +892,15 @@ do
 		})
 
 		Library.Font = CustomFont:Get("Monaco")
-	end
+	end]]
+
+	Library.Font = Typeface:Register({
+		url = "https://github.com/sametexe001/luas/raw/refs/heads/main/fonts/Monaco.ttf", -- make sure the url is raw link
+		name = "Monaco",
+		weight = "Regular",
+		style = "Normal",
+		path = Library.Folders.Assets,
+	})
 
 	Library.Holder = Instances:Create("ScreenGui", {
 		Parent = gethui(),
