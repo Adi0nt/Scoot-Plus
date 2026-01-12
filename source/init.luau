@@ -300,6 +300,7 @@ do
 			["Gradient"] = FromRGB(21, 21, 21),
 			["Text"] = FromRGB(255, 255, 255),
 			["Text Stroke"] = FromRGB(0, 0, 0),
+			["Placeholder Text"] = FromRGB(185, 185, 185),
 			["Accent"] = FromRGB(158, 79, 249),
 		},
 	}
