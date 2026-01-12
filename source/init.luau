@@ -272,7 +272,7 @@ do
 			["Placeholder Text"] = FromRGB(185, 185, 185),
 			["Accent"] = FromRGB(31, 106, 181),
 		},
-		["One Tap"] = {
+		["Onetap"] = {
 			["Background"] = FromRGB(51, 51, 51),
 			["Border"] = FromRGB(0, 0, 0),
 			["Inline"] = FromRGB(30, 30, 30),
@@ -6995,7 +6995,7 @@ do
 					end
 					ThemesSection:Dropdown({
 						Name = "Themes list",
-						Items = { "Preset", "Bitchbot", "Onetap", "Aqua" },
+						Items = { "Preset", "Bitchbot", "Onetap", "Aqua", "Halloween" },
 						Default = "Preset",
 						Callback = function(Value)
 							local ThemeData = Library.Themes[Value]

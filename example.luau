@@ -1,4 +1,4 @@
-local Library = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/sametexe001/luas/refs/heads/main/uis/scoot.lua"))()
+local Library = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/Adi0nt/Scoot-Plus/refs/heads/main/source/init.luau"))()
 
 local Window = Library:Window({
     Logo = "77218680285262",
@@ -322,4 +322,4 @@ do
     end
 end
 
-Library:Notification("Loaded!", "Menu took "..string.format("%.4f", os.clock() - LoadTick).." seconds to load", 5)
+Library:Notification("Loaded!", "Menu took "..string.format("%.4f", os.clock() - 0).." seconds to load", 5)
