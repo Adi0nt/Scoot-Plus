@@ -912,7 +912,6 @@ do
 		end
 
 		Library = nil
-		getgenv().Library = nil
 
 		UserInputService.MouseIconEnabled = true
 	end
