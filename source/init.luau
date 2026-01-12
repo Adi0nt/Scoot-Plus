@@ -7085,7 +7085,7 @@ do
 
 					LoadAndSaveButton:Add("Save", function()
 						if ThemeName and ThemeName ~= "" then
-							writefile(Library.Folders.Configs .. "/" .. ThemeName .. ".json", Library:GetTheme())
+							writefile(Library.Folders.Themes .. "/" .. ThemeName .. ".json", Library:GetTheme())
 							Library:Notification("Success", "Saved theme " .. ThemeName .. " succesfully", 5)
 							Library:RefreshThemeList(ThemesListbox)
 						end
