@@ -6993,8 +6993,8 @@ do
 					end
 					ThemesSection:Dropdown({
 						Name = "Themes list",
-						Items = { "Default", "Bitchbot", "Onetap", "Aqua" },
-						Default = "Default",
+						Items = { "Preset", "Bitchbot", "Onetap", "Aqua" },
+						Default = "Preset",
 						Callback = function(Value)
 							local ThemeData = Library.Themes[Value]
 
@@ -7006,17 +7006,8 @@ do
 								Library.Theme[Index] = ThemeData[Index]
 								Library:ChangeTheme(Index, ThemeData[Index])
 
-								Library.ThemeColorpickers[Index]:Set(ThemeData[Index])
+								--Library.ThemeColorpickers[Index]:Set(ThemeData[Index])
 							end
-
-							task.wait(0.3)
-
-							Library:Thread(function() -- i do this because sometimes the themes dont update
-								for Index, Value in Library.Theme do
-									Library.Theme[Index] = Library.Flags["Theme" .. Index].Color
-									Library:ChangeTheme(Index, Library.Flags["Theme" .. Index].Color)
-								end
-							end)
 						end,
 					})
 
