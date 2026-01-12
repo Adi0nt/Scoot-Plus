@@ -25,8 +25,8 @@ do
 	local Camera = Workspace.CurrentCamera
 	local Mouse = LocalPlayer:GetMouse()
 
-    local FromAssetId = Content.fromAssetId or function(self)
-		return {Uri = "rbxassetid://" .. self}
+	local FromAssetId = Content.fromAssetId or function(self)
+		return { Uri = "rbxassetid://" .. self }
 	end
 
 	local FromRGB = Color3.fromRGB
@@ -855,12 +855,11 @@ do
 	local CustomFont = {}
 	do
 		function CustomFont:New(Name, Weight, Style, Data)
-			if isfile(Library.Folders.Assets .. "/" .. Name .. ".json") then
-				return Font.new(getcustomasset(Library.Folders.Assets .. "/" .. Name .. ".json"))
-			end
+			local Path = Library.Folders.Assets .. "/" .. Name
 
-			if not isfile(Library.Folders.Assets .. "/" .. Name .. ".ttf") then
-				writefile(Library.Folders.Assets .. "/" .. Name .. ".ttf", game:HttpGet(Data.Url))
+			if not isfile(Path .. ".ttf") then
+				local Response = request(Data, true)
+				writefile(Path .. ".ttf", Response.Body)
 			end
 
 			local FontData = {
@@ -870,23 +869,27 @@ do
 						name = "Regular",
 						weight = Weight,
 						style = Style,
-						assetId = getcustomasset(Library.Folders.Assets .. "/" .. Name .. ".ttf"),
+						assetId = getcustomasset(Path .. ".ttf"),
 					},
 				},
 			}
 
-			writefile(Library.Folders.Assets .. "/" .. Name .. ".json", HttpService:JSONEncode(FontData))
-			return Font.new(getcustomasset(Library.Folders.Assets .. "/" .. Name .. ".json"))
+			writefile(Path .. ".json", HttpService:JSONEncode(FontData))
+
+			return Font.new(getcustomasset(Path .. ".json"))
 		end
 
 		function CustomFont:Get(Name)
-			if isfile(Library.Folders.Assets .. "/" .. Name .. ".json") then
-				return Font.new(getcustomasset(Library.Folders.Assets .. "/" .. Name .. ".json"))
+			local Path = Library.Folders.Assets .. "/" .. Name
+
+			if isfile(Path .. ".json") then
+				return Font.new(getcustomasset(Path .. ".json"))
 			end
 		end
 
-		CustomFont:New("Monaco", 400, "Regular", {
-			Url = "https://github.com/sametexe001/luas/raw/refs/heads/main/fonts/Monaco.ttf",
+		CustomFont:New("Monaco", 400, "normal", {
+			Url = "https://github.com/Adi0nt/Scoot-Plus/raw/main/assets/Monaco.ttf",
+			Method = "GET",
 		})
 
 		Library.Font = CustomFont:Get("Monaco")
@@ -1155,27 +1158,27 @@ do
 		return HttpService:JSONEncode(Theme)
 	end
 
-    Library.LoadTheme = function(self, Theme)
-        local Decoded = HttpService:JSONDecode(Theme)
+	Library.LoadTheme = function(self, Theme)
+		local Decoded = HttpService:JSONDecode(Theme)
 
-        local Success, Result = Library:SafeCall(function()
-            for Index, Value in Decoded do 
-                local SetFunction = Library.SetFlags[Index]
+		local Success, Result = Library:SafeCall(function()
+			for Index, Value in Decoded do
+				local SetFunction = Library.SetFlags[Index]
 
-                if not SetFunction then
-                    continue
-                end
+				if not SetFunction then
+					continue
+				end
 
-                if type(Value) == "table" and Value.Color then
-                    SetFunction(Value.Color, Value.Alpha)
-                end
-            end
-        end)
+				if type(Value) == "table" and Value.Color then
+					SetFunction(Value.Color, Value.Alpha)
+				end
+			end
+		end)
 
-        if Success then 
-            Library:Notification("Successfully loaded theme", 5, FromRGB(0, 255, 0))
-        end
-    end
+		if Success then
+			Library:Notification("Successfully loaded theme", 5, FromRGB(0, 255, 0))
+		end
+	end
 
 	Library.DeleteTheme = function(self, Theme)
 		if isfile(Library.Folders.Themes .. "/" .. Theme) then
@@ -6988,6 +6991,89 @@ do
 							end,
 						})
 					end
+					ThemesSection:Dropdown({
+						Name = "Themes list",
+						Items = { "Default", "Bitchbot", "Onetap", "Aqua" },
+						Default = "Default",
+						Callback = function(Value)
+							local ThemeData = Library.Themes[Value]
+
+							if not ThemeData then
+								return
+							end
+
+							for Index, Value in Library.Theme do
+								Library.Theme[Index] = ThemeData[Index]
+								Library:ChangeTheme(Index, ThemeData[Index])
+
+								Library.ThemeColorpickers[Index]:Set(ThemeData[Index])
+							end
+
+							task.wait(0.3)
+
+							Library:Thread(function() -- i do this because sometimes the themes dont update
+								for Index, Value in Library.Theme do
+									Library.Theme[Index] = Library.Flags["Theme" .. Index].Color
+									Library:ChangeTheme(Index, Library.Flags["Theme" .. Index].Color)
+								end
+							end)
+						end,
+					})
+
+					local ThemeName
+					local SelectedTheme
+
+					local ThemesListbox = ThemesSection:Searchbox({
+						Name = "Themes List",
+						Flag = "Themes List",
+						Items = {},
+						Multi = false,
+						Callback = function(Value)
+							SelectedTheme = Value
+						end,
+					})
+
+					ThemesSection:Textbox({
+						Name = "Name",
+						Flag = "Theme Name",
+						Default = "",
+						Placeholder = "Enter text",
+						Callback = function(Value)
+							ThemeName = Value
+						end,
+					})
+
+					local ThemesButton = ThemesSection:Button()
+
+					ThemesButton:Add("Save Theme", function()
+						if ThemeName == "" then
+							return
+						end
+
+						if not isfile(Library.Folders.Themes .. "/" .. ThemeName .. ".json") then
+							writefile(Library.Folders.Themes .. "/" .. ThemeName .. ".json", Library:GetTheme())
+
+							Library:RefreshThemeList(ThemesListbox)
+						else
+							Library:Notification(
+								"Theme '" .. ThemeName .. ".json' already exists",
+								3,
+								Color3.fromRGB(255, 0, 0)
+							)
+							return
+						end
+					end)
+					ThemesButton:Add("Load Theme", function()
+						if SelectedTheme then
+							Library:LoadTheme(readfile(Library.Folders.Themes .. "/" .. SelectedTheme))
+						end
+					end)
+
+					ThemesSection:Button():Add("Refresh Themes", function()
+						Library:RefreshThemeList(ThemesListbox)
+					end)
+
+					Library:RefreshThemeList(ThemesListbox)
 				end
 			end
 
