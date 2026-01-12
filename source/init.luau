@@ -1181,23 +1181,18 @@ do
 				end
 			end
 		end)
-
-		if Success then
-			Library:Notification("Successfully loaded theme", 5, FromRGB(0, 255, 0))
-		end
+		return Success, Result
 	end
 
 	Library.DeleteTheme = function(self, Theme)
 		if isfile(Library.Folders.Themes .. "/" .. Theme) then
 			delfile(Library.Folders.Themes .. "/" .. Theme)
-			Library:Notification("Deleted theme " .. Theme .. ".json", 5, FromRGB(0, 255, 0))
 		end
 	end
 
 	Library.SaveTheme = function(self, Theme)
 		if isfile(Library.Folders.Themes .. "/" .. Theme) then
 			writefile(Library.Folders.Themes .. "/" .. Theme, Library:GetTheme())
-			Library:Notification("Saved theme " .. Theme .. ".json", 5, FromRGB(0, 255, 0))
 		end
 	end
 
@@ -7077,11 +7072,11 @@ do
 								Library:LoadTheme(readfile(Library.Folders.Themes .. "/" .. SelectedTheme))
 
 							if Success then
-								Library:Notification("Success", "Loaded config " .. SelectedTheme .. " succesfully", 5)
+								Library:Notification("Success", "Loaded theme " .. SelectedTheme .. " succesfully", 5)
 							else
 								Library:Notification(
 									"Error",
-									"Failed to load config " .. SelectedTheme .. " report this to the devs:\n" .. Result,
+									"Failed to load theme " .. SelectedTheme .. " report this to the devs:\n" .. Result,
 									5
 								)
 							end
@@ -7091,7 +7086,7 @@ do
 					LoadAndSaveButton:Add("Save", function()
 						if ThemeName and ThemeName ~= "" then
 							writefile(Library.Folders.Configs .. "/" .. ThemeName .. ".json", Library:GetTheme())
-							Library:Notification("Success", "Saved config " .. ThemeName .. " succesfully", 5)
+							Library:Notification("Success", "Saved theme " .. ThemeName .. " succesfully", 5)
 							Library:RefreshThemeList(ThemesListbox)
 						end
 					end)
