@@ -1124,7 +1124,8 @@ do
 		local ConfigFolderName = StringGSub(Library.Folders.Configs, Library.Folders.Directory .. "/", "")
 
 		for Index, Value in listfiles(Library.Folders.Configs) do
-			local FileName = StringGSub(Value, Library.Folders.Directory .. "\\" .. ConfigFolderName .. "\\", "")
+			local FileName = StringGSub(Value, "\\", "/")
+			FileName = StringGSub(Value, Library.Folders.Directory .. "\\" .. ConfigFolderName .. "\\", "")
 			List[Index] = FileName
 		end
 
@@ -1201,7 +1202,8 @@ do
 		local ThemeFolderName = StringGSub(Library.Folders.Themes, Library.Folders.Directory .. "/", "")
 
 		for Index, Value in listfiles(Library.Folders.Themes) do
-			local FileName = StringGSub(Value, Library.Folders.Directory .. "\\" .. ThemeFolderName .. "\\", "")
+			local FileName = StringGSub(Value, "\\", "/")
+			FileName = StringGSub(Value, Library.Folders.Directory .. "\\" .. ThemeFolderName .. "\\", "")
 			List[Index] = FileName
 		end
 
