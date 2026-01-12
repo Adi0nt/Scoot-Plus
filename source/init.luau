@@ -1157,7 +1157,7 @@ do
 		local Success, Result = Library:SafeCall(function()
 			for Index, Value in Library.Flags do
 				if type(Value) == "table" and Value.Color and StringFind(Index, "Theme") then
-					Theme[Index] = { Color = Value.HexValue, Alpha = Value.Alpha }
+					Theme[Index] = { Color = "#" .. Value.Color, Alpha = Value.Alpha }
 				end
 			end
 		end)
@@ -7042,33 +7042,61 @@ do
 						end,
 					})
 
-					local ThemesButton = ThemesSection:Button()
+					local CreateAndDeleteButton = ThemesSection:Button()
 
-					ThemesButton:Add("Save Theme", function()
-						if ThemeName == "" then
-							return
-						end
-
-						if not isfile(Library.Folders.Themes .. "/" .. ThemeName .. ".json") then
-							writefile(Library.Folders.Themes .. "/" .. ThemeName .. ".json", Library:GetTheme())
-
-							Library:RefreshThemeList(ThemesListbox)
-						else
-							Library:Notification(
-								"Theme '" .. ThemeName .. ".json' already exists",
-								3,
-								Color3.fromRGB(255, 0, 0)
-							)
-							return
+					CreateAndDeleteButton:Add("Create", function()
+						if ThemeName and ThemeName ~= "" then
+							if not isfile(Library.Folders.Themes .. "/" .. ThemeName .. ".json") then
+								writefile(Library.Folders.Themes .. "/" .. ThemeName .. ".json", Library:GetTheme())
+								Library:Notification("Success", "Created theme " .. ThemeName .. " succesfully", 5)
+								Library:RefreshThemeList(ThemesListbox)
+							else
+								Library:Notification(
+									"Error",
+									"Theme with the name " .. ThemeName .. " already exists",
+									5
+								)
+								return
+							end
 						end
 					end)
-					ThemesButton:Add("Load Theme", function()
+
+					CreateAndDeleteButton:Add("Delete", function()
 						if SelectedTheme then
-							Library:LoadTheme(readfile(Library.Folders.Themes .. "/" .. SelectedTheme))
+							Library:DeleteTheme(SelectedTheme)
+							Library:Notification("Success", "Deleted theme " .. SelectedTheme .. " succesfully", 5)
+							Library:RefreshThemeList(ThemesListbox)
 						end
 					end)
 
-					ThemesSection:Button():Add("Refresh Themes", function()
+					local LoadAndSaveButton = ThemesSection:Button()
+
+					LoadAndSaveButton:Add("Load", function()
+						if SelectedTheme then
+							local Success, Result =
+								Library:LoadTheme(readfile(Library.Folders.Themes .. "/" .. SelectedTheme))
+
+							if Success then
+								Library:Notification("Success", "Loaded config " .. SelectedTheme .. " succesfully", 5)
+							else
+								Library:Notification(
+									"Error",
+									"Failed to load config " .. SelectedTheme .. " report this to the devs:\n" .. Result,
+									5
+								)
+							end
+						end
+					end)
+
+					LoadAndSaveButton:Add("Save", function()
+						if ThemeName and ThemeName ~= "" then
+							writefile(Library.Folders.Configs .. "/" .. ThemeName .. ".json", Library:GetTheme())
+							Library:Notification("Success", "Saved config " .. ThemeName .. " succesfully", 5)
+							Library:RefreshThemeList(ThemesListbox)
+						end
+					end)
+
+					ThemesSection:Button():Add("Refresh", function()
 						Library:RefreshThemeList(ThemesListbox)
 					end)
 
@@ -7158,6 +7186,10 @@ do
 							Library:Notification("Success", "Saved config " .. ConfigName .. " succesfully", 5)
 							Library:RefreshConfigsList(ConfigsSearchbox)
 						end
+					end)
+
+					ConfigsSection:Button():Add("Refresh", function()
+						Library:RefreshConfigsList(ConfigsSearchbox)
 					end)
 
 					Library:RefreshConfigsList(ConfigsSearchbox)
