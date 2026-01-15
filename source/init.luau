@@ -1161,7 +1161,7 @@ do
 	Library.GetTheme = function(self)
 		local Theme = {}
 
-		local Success = Library:SafeCall(function()
+		local Success, Result = Library:SafeCall(function()
 			for Index, Value in Library.Flags do
 				if not StringFind(Index, "Theme") then
 					continue
@@ -1184,17 +1184,25 @@ do
 
 		local Success, Result = Library:SafeCall(function()
 			for Index, Value in Decoded do
+				if not StringFind(Index, "Theme") then
+					continue
+				end
 				local SetFunction = Library.SetFlags[Index]
 
 				if not SetFunction then
 					continue
 				end
 
-				if type(Value) == "table" and Value.Color then
+				if type(Value) == "table" and Value.Key then
+					SetFunction(Value)
+				elseif type(Value) == "table" and Value.Color then
 					SetFunction(Value.Color, Value.Alpha)
+				else
+					SetFunction(Value)
 				end
 			end
 		end)
+
 		return Success, Result
 	end
 
