@@ -1125,6 +1125,12 @@ do
 		end
 	end
 
+	Library.SaveConfig = function(self, Config)
+		if isfile(Library.Folders.Configs .. "/" .. Config) then
+			writefile(Library.Folders.Configs .. "/" .. Config, Library:GetConfig())
+		end
+	end
+
 	Library.RefreshConfigsList = function(self, Element)
 		local CurrentList = {}
 		local List = {}
@@ -1155,10 +1161,17 @@ do
 	Library.GetTheme = function(self)
 		local Theme = {}
 
-		local Success, Result = Library:SafeCall(function()
+		local Success = Library:SafeCall(function()
 			for Index, Value in Library.Flags do
-				if type(Value) == "table" and Value.Color and StringFind(Index, "Theme") then
+				if not StringFind(Index, "Theme") then
+					continue
+				end
+				if type(Value) == "table" and Value.Key then
+					Theme[Index] = { Key = tostring(Value.Key), Mode = Value.Mode }
+				elseif type(Value) == "table" and Value.Color then
 					Theme[Index] = { Color = "#" .. Value.Color, Alpha = Value.Alpha }
+				else
+					Theme[Index] = Value
 				end
 			end
 		end)
