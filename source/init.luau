@@ -2672,6 +2672,68 @@ do
 				})
 				Items["Icon"]:AddToTheme({ ImageColor3 = "Accent" })
 
+				if Data.Searchable then
+					Items["SearchHolder"] = Instances:Create("Frame", { -- TODO
+						Parent = Library.UnusedHolder.Instance,
+						Name = "\0",
+						Visible = false,
+						BorderColor3 = FromRGB(12, 12, 12),
+						BorderSizePixel = 2,
+						Position = UDim2New(0, 0, 1, 8),
+						Size = UDim2New(1, 0, 0, 25),
+						ZIndex = 5,
+						AutomaticSize = Enum.AutomaticSize.Y,
+						BackgroundColor3 = FromRGB(20, 24, 21),
+					})
+					Items["SearchHolder"]:AddToTheme({ BackgroundColor3 = "Inline", BorderColor3 = "Border" })
+
+					Instances:Create("UIStroke", {
+						Parent = Items["SearchHolder"].Instance,
+						Name = "\0",
+						Color = FromRGB(42, 49, 45),
+						LineJoinMode = Enum.LineJoinMode.Miter,
+						ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+					}):AddToTheme({ Color = "Outline" })
+
+					Instances:Create("UIPadding", {
+						Parent = Items["SearchHolder"].Instance,
+						Name = "\0",
+						PaddingTop = UDimNew(0, 5),
+						PaddingBottom = UDimNew(0, 5),
+						PaddingRight = UDimNew(0, 5),
+						PaddingLeft = UDimNew(0, 8),
+					})
+
+					Instances:Create("UIListLayout", {
+						Parent = Items["SearchHolder"].Instance,
+						Name = "\0",
+						Padding = UDimNew(0, 3),
+						SortOrder = Enum.SortOrder.LayoutOrder,
+					})
+
+					Items["Input"] = Instances:Create("TextBox", {
+						Parent = Items["SearchHolder"].Instance,
+						Name = "\0",
+						FontFace = Library.Font,
+						TextColor3 = FromRGB(235, 235, 235),
+						BorderColor3 = FromRGB(0, 0, 0),
+						Text = "",
+						Size = UDim2New(1, 0, 0, 15),
+						Position = UDim2New(0, 22, 0, 0),
+						BorderSizePixel = 0,
+						BackgroundTransparency = 1,
+						PlaceholderColor3 = FromRGB(185, 185, 185),
+						AutomaticSize = Enum.AutomaticSize.X,
+						PlaceholderText = "search..",
+						TextSize = 9 + TextSize,
+						BackgroundColor3 = FromRGB(255, 255, 255),
+						ZIndex = 5,
+					})
+					Items["Input"]:AddToTheme({ TextColor3 = "Text", PlaceholderColor3 = "Placeholder Text" })
+
+					Items["Input"]:TextBorder()
+				end
+
 				Items["OptionHolder"] = Instances:Create("Frame", {
 					Parent = Library.UnusedHolder.Instance,
 					Name = "\0",
@@ -2732,18 +2794,34 @@ do
 				Debounce = true
 
 				if Dropdown.IsOpen then
+					if Data.Searchable then
+						Items["SearchHolder"].Instance.Visible = true
+						Items["SearchHolder"].Instance.Parent = Library.Holder.Instance
+					end
 					Items["OptionHolder"].Instance.Visible = true
 					Items["OptionHolder"].Instance.Parent = Library.Holder.Instance
 					Items["Icon"]:Tween(nil, { Rotation = -90 })
 
 					RenderStepped = RunService.RenderStepped:Connect(function()
+						if Data.Searchable then
+							Items["SearchHolder"].Instance.Position = UDim2New(
+								0,
+								Items["RealDropdown"].Instance.AbsolutePosition.X,
+								0,
+								Items["RealDropdown"].Instance.AbsolutePosition.Y
+									+ Items["RealDropdown"].Instance.AbsoluteSize.Y
+									+ 5
+							)
+							Items["SearchHolder"].Instance.Size =
+								UDim2New(0, Items["RealDropdown"].Instance.AbsoluteSize.X, 0, 0)
+						end
 						Items["OptionHolder"].Instance.Position = UDim2New(
 							0,
 							Items["RealDropdown"].Instance.AbsolutePosition.X,
 							0,
 							Items["RealDropdown"].Instance.AbsolutePosition.Y
 								+ Items["RealDropdown"].Instance.AbsoluteSize.Y
-								+ 5
+								+ (Data.Searchable and 35 or 5)
 						)
 						Items["OptionHolder"].Instance.Size =
 							UDim2New(0, Items["RealDropdown"].Instance.AbsoluteSize.X, 0, 0)
@@ -2796,8 +2874,15 @@ do
 
 				NewTween.Tween.Completed:Connect(function()
 					Debounce = false
+					if Data.Searchable then
+						Items["SearchHolder"].Instance.Visible = Dropdown.IsOpen
+					end
 					Items["OptionHolder"].Instance.Visible = Dropdown.IsOpen
 					task.wait(0.2)
+					if Data.Searchable then
+						Items["SearchHolder"].Instance.Parent = not Dropdown.IsOpen and Library.UnusedHolder.Instance
+							or Library.Holder.Instance
+					end
 					Items["OptionHolder"].Instance.Parent = not Dropdown.IsOpen and Library.UnusedHolder.Instance
 						or Library.Holder.Instance
 				end)
@@ -2992,9 +3077,42 @@ do
 						return
 					end
 
+					if Data.Searchable then
+						if Library:IsMouseOverFrame(Items["SearchHolder"]) then
+							return
+						end
+					end
+
 					Dropdown:SetOpen(false)
 				end
 			end)
+
+			if Data.Searchable then
+				local SearchStepped
+
+				Items["Input"]:Connect("Focused", function()
+					SearchStepped = RunService.RenderStepped:Connect(function()
+						for Index, Value in next, Dropdown.Options do
+							if Items["Input"].Instance.Text ~= "" then
+								if StringFind(StringLower(Value.Name), StringLower(Items["Input"].Instance.Text)) then
+									Value.Button.Instance.Visible = true
+								else
+									Value.Button.Instance.Visible = false
+								end
+							else
+								Value.Button.Instance.Visible = true
+							end
+						end
+					end)
+				end)
+
+				Items["Input"]:Connect("FocusLost", function()
+					if SearchStepped then
+						SearchStepped:Disconnect()
+						SearchStepped = nil
+					end
+				end)
+			end
 
 			for Index, Value in Data.Items do
 				Dropdown:Add(Value)
@@ -6766,6 +6884,7 @@ do
 			Default = Data.Default or Data.default or nil,
 			ToolTip = Data.ToolTip or Data.tooltip or nil,
 			Multi = Data.Multi or Data.multi or false,
+			Searchable = Data.Searchable or Data.searchable or false,
 			Callback = Data.Callback or Data.callback or function() end,
 		}
 
@@ -6777,6 +6896,7 @@ do
 			Page = Dropdown.Page,
 			Default = Dropdown.Default,
 			Multi = Dropdown.Multi,
+			Searchable = Dropdown.Searchable,
 			Callback = Dropdown.Callback,
 		})
 
